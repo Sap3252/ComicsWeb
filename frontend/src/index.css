@@ -1,0 +1,12 @@
+body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 16px; }
+nav { display: flex; gap: 12px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #ccc; }
+form { display: flex; flex-direction: column; gap: 8px; max-width: 320px; margin-bottom: 24px; }
+label { display: flex; flex-direction: column; font-size: 14px; }
+.comic { display: flex; gap: 16px; align-items: center; border-bottom: 1px solid #eee; padding: 8px 0; }
+.comic img { width: 60px; }
+.comic h3, .comic p { margin: 2px 0; }
+.votos { display: flex; flex-direction: column; align-items: center; }
+.activo { background: orange; }
+.error { color: crimson; }
+.ok { color: green; }
+td { padding: 4px 8px; }
