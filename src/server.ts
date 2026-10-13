@@ -3,6 +3,7 @@ import "dotenv/config";
 import cors from 'cors';
 import { connectDB } from "./config/db.js";
 import { comicsRouter } from "./routes/comics.js";
+import { authRouter } from "./routes/auth.js";
 
 
 const app = express();
@@ -18,6 +19,7 @@ if (NODE_ENV === "development") {
     res.send('hola');
   });
 }
+app.use('/api/auth', authRouter);
 app.use('/api/comics', comicsRouter);
 
 await connectDB();                        

@@ -1,11 +1,16 @@
 import type { Request, Response } from 'express';
 import Comic from '../models/comics.js';
+import { getResumenVotos, RESUMEN_VACIO } from '../services/votos.service.js';
 
 // GET /api/comics
 export const getComics = async (_req: Request, res: Response): Promise<void> => {
     try {
         const comics = await Comic.find({ activo: true });
-        res.json(comics);
+        const votos = await getResumenVotos(comics.map((c) => c._id));
+        res.json(comics.map((c) => ({
+            ...c.toObject(),
+            votos: votos.get(c._id.toString()) ?? RESUMEN_VACIO
+        })));
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener los cómics' });
     }
@@ -19,7 +24,8 @@ export const getComicById = async (req: Request, res: Response): Promise<void> =
             res.status(404).json({ message: 'Cómic no encontrado' });
             return;
         }
-        res.json(comic);
+        const votos = await getResumenVotos([comic._id]);
+        res.json({ ...comic.toObject(), votos: votos.get(comic._id.toString()) ?? RESUMEN_VACIO });
     } catch (error) {
         res.status(400).json({ message: 'ID inválido' });
     }
