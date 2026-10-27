@@ -10,3 +10,31 @@ label { display: flex; flex-direction: column; font-size: 14px; }
 .error { color: crimson; }
 .ok { color: green; }
 td { padding: 4px 8px; }
+
+/* Detalle de un cómic */
+.detalle { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.detalle h1 { margin-top: 0; }
+
+/* Visor 3D (components/Comic3D.tsx): la portada y la contraportada espalda con espalda,
+   separadas por el grosor del lomo y los cantos. Selectores con .libro para ganarle a .comic img */
+.comic3d { --w: 220px; --h: 330px; --t: 10px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 300px; max-width: 100%; }
+.escena { position: relative; display: grid; place-items: center; width: 100%; height: calc(var(--h) + 90px); perspective: 1000px; background: #f2f2f2; border-radius: 8px; cursor: grab; touch-action: pan-y; user-select: none; }
+.escena:active { cursor: grabbing; }
+.escena:focus-visible { outline: 3px solid orange; outline-offset: 3px; }
+.libro { position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d; }
+.libro > div { position: absolute; backface-visibility: hidden; }
+.libro .cara { inset: 0; overflow: hidden; }
+.libro .cara img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* sombra de la cara que se aleja de la cámara y reflejo que se corre con el giro */
+.libro .cara::before, .libro .cara::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.libro .cara::before { background: #000; opacity: var(--luz, 0); }
+.libro .cara::after { background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, .25) 50%, transparent 60%); background-size: 320% 100%; background-position: var(--brillo, 50%) 0; }
+.libro .frente { --luz: var(--luz-frente); border-radius: 1px 4px 4px 1px; transform: translateZ(calc(var(--t) / 2)); }
+.libro .dorso { --luz: var(--luz-dorso); border-radius: 4px 1px 1px 4px; transform: rotateY(180deg) translateZ(calc(var(--t) / 2)); }
+.libro .lomo { top: 0; left: calc(var(--t) / -2); width: var(--t); height: var(--h); background: linear-gradient(90deg, #111, #444 45%, #111); transform: rotateY(-90deg); }
+.libro .canto { top: 0; left: calc(var(--w) - var(--t) / 2); width: var(--t); height: var(--h); background: repeating-linear-gradient(90deg, #f5f0e3 0 1px, #d3cab5 1px 2px); transform: rotateY(90deg); }
+.libro .arriba, .libro .abajo { left: 0; width: var(--w); height: var(--t); background: repeating-linear-gradient(0deg, #f5f0e3 0 1px, #d3cab5 1px 2px); }
+.libro .arriba { top: calc(var(--t) / -2); transform: rotateX(90deg); }
+.libro .abajo { top: calc(var(--h) - var(--t) / 2); transform: rotateX(-90deg); }
+.piso { position: absolute; left: 50%; top: calc(50% + var(--h) / 2 + 14px); width: calc(var(--w) * 1.1); height: 24px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .35), transparent); pointer-events: none; }
+.comic3d-botones { display: flex; gap: 8px; }

@@ -3,15 +3,16 @@ import * as api from "../api/api";
 import type { Comic, ComicInput } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
-const VACIO: ComicInput = { titulo: "", año: new Date().getFullYear(), volumen: 1, autor: "", saga: "", portada: "" };
+const VACIO: ComicInput = { titulo: "", año: new Date().getFullYear(), volumen: 1, autor: "", saga: "", portada: "", contraportada: "" };
 
-const CAMPOS: { name: keyof ComicInput; label: string; type: "text" | "number" }[] = [
+const CAMPOS: { name: keyof ComicInput; label: string; type: "text" | "number"; opcional?: boolean }[] = [
     { name: "titulo", label: "Título", type: "text" },
     { name: "saga", label: "Saga", type: "text" },
     { name: "volumen", label: "Volumen", type: "number" },
     { name: "autor", label: "Autor", type: "text" },
     { name: "año", label: "Año", type: "number" },
-    { name: "portada", label: "URL de la portada", type: "text" }
+    { name: "portada", label: "URL de la portada", type: "text" },
+    { name: "contraportada", label: "URL de la contraportada", type: "text", opcional: true }
 ];
 
 // Protegida por rol: solo admin. Alta, edición y baja de cómics
@@ -44,7 +45,7 @@ export function Admin() {
     const editar = (comic: Comic) => {
         const { titulo, año, volumen, autor, saga, portada } = comic;
         setEditandoId(comic._id);
-        setForm({ titulo, año, volumen, autor, saga, portada });
+        setForm({ titulo, año, volumen, autor, saga, portada, contraportada: comic.contraportada ?? "" });
     };
 
     const cancelar = () => {
@@ -76,15 +77,15 @@ export function Admin() {
 
             <form onSubmit={onSubmit}>
                 <h2>{editandoId ? "Editar cómic" : "Nuevo cómic"}</h2>
-                {CAMPOS.map(({ name, label, type }) => (
+                {CAMPOS.map(({ name, label, type, opcional }) => (
                     <label key={name}>
-                        {label}
+                        {opcional ? `${label} (opcional)` : label}
                         <input
                             type={type}
                             placeholder={label}
-                            value={form[name]}
+                            value={form[name] ?? ""}
                             onChange={(e) => setForm({ ...form, [name]: type === "number" ? Number(e.target.value) : e.target.value })}
-                            required
+                            required={!opcional}
                         />
                     </label>
                 ))}

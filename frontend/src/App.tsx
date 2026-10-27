@@ -7,6 +7,7 @@ import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Perfil } from "./pages/Perfil";
 import { Admin } from "./pages/Admin";
+import { ComicDetalle } from "./pages/ComicDetalle";
 
 export function App() {
     const { user, logout } = useAuth();
@@ -34,6 +35,7 @@ export function App() {
                 <Routes>
                     {/* Rutas públicas */}
                     <Route path="/" element={<Home />} />
+                    <Route path="/comic/:id" element={<ComicDetalle />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
 

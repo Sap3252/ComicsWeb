@@ -49,9 +49,11 @@ export function Home() {
                             <button className={misVotos[comic._id] === "down" ? "activo" : ""} onClick={() => votar(comic, "down")}>▼</button>
                         )}
                     </div>
-                    <img src={comic.portada} alt={comic.titulo} />
+                    <Link to={`/comic/${comic._id}`}>
+                        <img src={comic.portada} alt={comic.titulo} />
+                    </Link>
                     <div>
-                        <h3>{comic.titulo}</h3>
+                        <h3><Link to={`/comic/${comic._id}`}>{comic.titulo}</Link></h3>
                         <p>{comic.saga} - Vol. {comic.volumen} ({comic.año})</p>
                         <p>{comic.autor}</p>
                     </div>

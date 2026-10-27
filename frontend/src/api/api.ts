@@ -24,6 +24,7 @@ export interface Comic {
     autor: string;
     saga: string;
     portada: string;
+    contraportada?: string;
     votos: Votos;
 }
 
@@ -73,6 +74,8 @@ export const getPerfil = (token: string) =>
 
 // Cómics
 export const getComics = () => request<Comic[]>("/comics");
+
+export const getComic = (id: string) => request<Comic>(`/comics/${id}`);
 
 export const crearComic = (comic: ComicInput, token: string) =>
     request<Comic>("/comics", "POST", comic, token);
