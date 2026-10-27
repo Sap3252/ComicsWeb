@@ -7,6 +7,7 @@ export interface IComic {
     autor: string;
     saga: string;
     portada: string;
+    contraportada?: string;
     activo: boolean;
 }
 
@@ -47,7 +48,13 @@ const comicSchema = new Schema<IComicDocument>({
         type: String,
         required: [true, "La portada es obligatoria"],
         trim: true,
-        maxlength: [200, "La portada no puede tener más de 200 caracteres"]
+        maxlength: [500, "La portada no puede tener más de 500 caracteres"]
+    },
+    // Opcional: sin contraportada, el visor 3D repite la portada
+    contraportada: {
+        type: String,
+        trim: true,
+        maxlength: [500, "La contraportada no puede tener más de 500 caracteres"]
     },
     activo: {
         type: Boolean,
