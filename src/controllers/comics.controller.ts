@@ -1,83 +1,55 @@
 import type { Request, Response } from 'express';
 import Comic from '../models/comics.js';
-import { getResumenVotos, RESUMEN_VACIO } from '../services/votos.service.js';
+import { HttpError } from '../errors/http-error.js';
+import { getComicActivo } from '../services/comics.service.js';
+import { getResumenVotos, getResumenVotosDe, RESUMEN_VACIO } from '../services/votos.service.js';
 
 // GET /api/comics
 export const getComics = async (_req: Request, res: Response): Promise<void> => {
-    try {
-        const comics = await Comic.find({ activo: true });
-        const votos = await getResumenVotos(comics.map((c) => c._id));
-        res.json(comics.map((c) => ({
-            ...c.toObject(),
-            votos: votos.get(c._id.toString()) ?? RESUMEN_VACIO
-        })));
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener los cómics' });
-    }
+    const comics = await Comic.find({ activo: true });
+    const votos = await getResumenVotos(comics.map((c) => c._id));
+
+    res.json(comics.map((c) => ({
+        ...c.toObject(),
+        votos: votos.get(c._id.toString()) ?? RESUMEN_VACIO
+    })));
 };
 
 // GET /api/comics/:id
-export const getComicById = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const comic = await Comic.findById(req.params.id);
-        if (!comic || !comic.activo) {
-            res.status(404).json({ message: 'Cómic no encontrado' });
-            return;
-        }
-        const votos = await getResumenVotos([comic._id]);
-        res.json({ ...comic.toObject(), votos: votos.get(comic._id.toString()) ?? RESUMEN_VACIO });
-    } catch (error) {
-        res.status(400).json({ message: 'ID inválido' });
-    }
+export const getComicById = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    const comic = await getComicActivo(req.params.id);
+
+    res.json({ ...comic.toObject(), votos: await getResumenVotosDe(comic._id) });
 };
 
 // POST /api/comics
 export const createComic = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const comic = await Comic.create(req.body);
-        res.status(201).json(comic);
-    } catch (error) {
-        res.status(400).json({
-            message: 'Error al crear el cómic',
-            error: error instanceof Error ? error.message : error
-        });
-    }
+    const comic = await Comic.create(req.body);
+
+    res.status(201).json(comic);
 };
 
 // PUT /api/comics/:id
-export const updateComic = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const comic = await Comic.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
-        if (!comic) {
-            res.status(404).json({ message: 'Cómic no encontrado' });
-            return;
-        }
-        res.json(comic);
-    } catch (error) {
-        res.status(400).json({
-            message: 'Error al actualizar el cómic',
-            error: error instanceof Error ? error.message : error
-        });
+export const updateComic = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    const comic = await Comic.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true
+    });
+
+    if (!comic) {
+        throw new HttpError(404, 'Cómic no encontrado');
     }
+
+    res.json(comic);
 };
 
 // DELETE /api/comics/:id  (borrado lógico)
-export const deleteComic = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const comic = await Comic.findByIdAndUpdate(
-            req.params.id,
-            { activo: false },
-            { new: true }
-        );
-        if (!comic) {
-            res.status(404).json({ message: 'Cómic no encontrado' });
-            return;
-        }
-        res.json({ message: 'Cómic eliminado' });
-    } catch (error) {
-        res.status(400).json({ message: 'ID inválido' });
+export const deleteComic = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    const comic = await Comic.findByIdAndUpdate(req.params.id, { activo: false });
+
+    if (!comic) {
+        throw new HttpError(404, 'Cómic no encontrado');
     }
+
+    res.json({ message: 'Cómic eliminado' });
 };

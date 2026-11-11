@@ -4,6 +4,7 @@ import cors from 'cors';
 import { connectDB } from "./config/db.js";
 import { comicsRouter } from "./routes/comics.js";
 import { authRouter } from "./routes/auth.js";
+import { errorHandler } from "./middlewares/error-handler.js";
 
 
 const app = express();
@@ -16,11 +17,12 @@ app.use(express.json());                 // <-- sin esto, req.body llega undefin
 
 if (NODE_ENV === "development") {
   app.get('/', (req: Request, res: Response) => {
-    res.send('hola');
+    res.send('Servidor Activo');
   });
 }
 app.use('/api/auth', authRouter);
 app.use('/api/comics', comicsRouter);
+app.use(errorHandler);                   // después de las rutas: recibe los errores que lanzan
 
 await connectDB();                        
 

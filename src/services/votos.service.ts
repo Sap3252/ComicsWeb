@@ -27,3 +27,9 @@ export async function getResumenVotos(comicIds: Types.ObjectId[]): Promise<Map<s
         { puntaje: f.upvotes - f.downvotes, upvotes: f.upvotes, downvotes: f.downvotes }
     ]));
 }
+
+// Votos de un solo cómic (en cero si todavía nadie lo votó)
+export async function getResumenVotosDe(comicId: Types.ObjectId): Promise<ResumenVotos> {
+    const votos = await getResumenVotos([comicId]);
+    return votos.get(comicId.toString()) ?? RESUMEN_VACIO;
+}
