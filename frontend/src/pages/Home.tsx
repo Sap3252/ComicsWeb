@@ -6,10 +6,14 @@ import { TarjetaComic } from "../components/TarjetaComic";
 import { useAuth } from "../context/AuthContext";
 import { leerTags } from "../tags";
 
+// Las portadas de la primera fila se piden enseguida; el resto, al acercarse a la pantalla
+const PORTADAS_PRIORITARIAS = 4;
+
 // Pública: cualquiera ve los cómics y los busca por tags; los usuarios logueados además pueden votar
 export function Home() {
     const { token } = useAuth();
     const [comics, setComics] = useState<Comic[]>([]);
+    const [cargando, setCargando] = useState(true);
     const [misVotos, setMisVotos] = useState<Record<string, TipoVoto | null>>({});
     const [error, setError] = useState("");
     const [busqueda, setBusqueda] = useState("");
@@ -24,7 +28,8 @@ export function Home() {
         let vigente = true;
         api.getComics(leerTags(tagsEnUrl))
             .then((lista) => vigente && setComics(lista))
-            .catch((e: Error) => vigente && setError(e.message));
+            .catch((e: Error) => vigente && setError(e.message))
+            .finally(() => vigente && setCargando(false));
         return () => {
             vigente = false;
         };
@@ -87,18 +92,19 @@ export function Home() {
                 </p>
             )}
 
-            {comics.length === 0 && !error && (
+            {!cargando && comics.length === 0 && !error && (
                 <p className="globo">{filtro.length > 0 ? "Ningún cómic tiene esos tags." : "No hay cómics cargados."}</p>
             )}
 
             <div className="comics">
-                {comics.map((comic) => (
+                {comics.map((comic, posicion) => (
                     <TarjetaComic
                         key={comic._id}
                         comic={comic}
                         filtro={filtro}
                         miVoto={misVotos[comic._id] ?? null}
                         puedeVotar={token !== null}
+                        portadaPrioritaria={posicion < PORTADAS_PRIORITARIAS}
                         onVotar={(tipo) => votar(comic, tipo)}
                     />
                 ))}

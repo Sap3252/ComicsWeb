@@ -9,17 +9,25 @@ interface Props {
     filtro: string[];
     miVoto: TipoVoto | null;
     puedeVotar: boolean;
+    // La portada se ve sin scrollear: se pide enseguida en vez de esperar a que entre en pantalla
+    portadaPrioritaria: boolean;
     onVotar: (tipo: TipoVoto) => void;
 }
 
 // Viñeta de un cómic en la lista: portada, datos y la tira de votos al pie
-export function TarjetaComic({ comic, filtro, miVoto, puedeVotar, onVotar }: Props) {
+export function TarjetaComic({ comic, filtro, miVoto, puedeVotar, portadaPrioritaria, onVotar }: Props) {
     const detalle = `/comic/${comic._id}`;
 
     return (
         <article className="comic">
             <Link to={detalle} className="comic-portada">
-                <img src={comic.portada} alt={comic.titulo} />
+                <img
+                    src={comic.portada}
+                    alt={comic.titulo}
+                    loading={portadaPrioritaria ? "eager" : "lazy"}
+                    fetchPriority={portadaPrioritaria ? "high" : "auto"}
+                    decoding="async"
+                />
             </Link>
             <div className="comic-info">
                 <LeyendaEdicion comic={comic} />

@@ -53,7 +53,8 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { background: var(--fondo-base); }
+/* scrollbar-gutter: la barra de scroll aparece al cargar la lista y si no corre todo de lugar */
+html { background: var(--fondo-base); scrollbar-gutter: stable; }
 body {
     min-height: 100vh;
     margin: 0 auto;
