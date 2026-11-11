@@ -76,7 +76,7 @@ export function Admin() {
 
     return (
         <>
-            <h1>Administrar cómics</h1>
+            <h1 className="titular">Administrar cómics</h1>
             {mensaje && <p className="ok">{mensaje}</p>}
             {error && <p className="error">{error}</p>}
 
@@ -95,26 +95,30 @@ export function Admin() {
                     </label>
                 ))}
                 <SelectorTags existentes={tagsExistentes} seleccionados={form.tags} onChange={(tags) => setForm({ ...form, tags })} />
-                <button type="submit">{editandoId ? "Guardar cambios" : "Agregar"}</button>
-                {editandoId && <button type="button" onClick={cancelar}>Cancelar</button>}
+                <div className="acciones">
+                    <button type="submit">{editandoId ? "Guardar cambios" : "Agregar"}</button>
+                    {editandoId && <button type="button" onClick={cancelar}>Cancelar</button>}
+                </div>
             </form>
 
-            <h2>Cómics cargados</h2>
-            <table>
-                <tbody>
-                    {comics.map((comic) => (
-                        <tr key={comic._id}>
-                            <td>{comic.titulo} (Vol. {comic.volumen})</td>
-                            <td>{escribirTags(comic.tags)}</td>
-                            <td>Puntaje: {comic.votos.puntaje}</td>
-                            <td>
-                                <button onClick={() => editar(comic)}>Editar</button>
-                                <button onClick={() => eliminar(comic)}>Eliminar</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <h2 className="subtitulo">Cómics cargados</h2>
+            <div className="tabla">
+                <table>
+                    <tbody>
+                        {comics.map((comic) => (
+                            <tr key={comic._id}>
+                                <td>{comic.titulo} (Vol. {comic.volumen})</td>
+                                <td>{escribirTags(comic.tags)}</td>
+                                <td>Puntaje: {comic.votos.puntaje}</td>
+                                <td>
+                                    <button onClick={() => editar(comic)}>Editar</button>
+                                    <button className="peligro" onClick={() => eliminar(comic)}>Eliminar</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </>
     );
 }

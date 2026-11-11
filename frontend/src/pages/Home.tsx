@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router";
 import * as api from "../api/api";
 import type { Comic, TipoVoto } from "../api/api";
-import { Tags } from "../components/Tags";
+import { TarjetaComic } from "../components/TarjetaComic";
 import { useAuth } from "../context/AuthContext";
 import { leerTags } from "../tags";
 
@@ -56,9 +56,9 @@ export function Home() {
 
     return (
         <>
-            <h1>Cómics</h1>
+            <h1 className="titular">Cómics</h1>
             {error && <p className="error">{error}</p>}
-            {!token && <p><Link to="/login">Ingresá</Link> para votar.</p>}
+            {!token && <p className="leyenda"><Link to="/login">Ingresá</Link> para votar.</p>}
 
             <form className="buscador" onSubmit={buscar}>
                 <input
@@ -71,7 +71,7 @@ export function Home() {
             </form>
 
             {filtro.length > 0 && (
-                <p className="tags">
+                <p className="tags filtro">
                     Con todos estos tags:
                     {filtro.map((tag) => (
                         <button
@@ -88,31 +88,21 @@ export function Home() {
             )}
 
             {comics.length === 0 && !error && (
-                <p>{filtro.length > 0 ? "Ningún cómic tiene esos tags." : "No hay cómics cargados."}</p>
+                <p className="globo">{filtro.length > 0 ? "Ningún cómic tiene esos tags." : "No hay cómics cargados."}</p>
             )}
 
-            {comics.map((comic) => (
-                <div key={comic._id} className="comic">
-                    <div className="votos">
-                        {token && (
-                            <button className={misVotos[comic._id] === "up" ? "activo" : ""} onClick={() => votar(comic, "up")}>▲</button>
-                        )}
-                        <strong>{comic.votos.puntaje}</strong>
-                        {token && (
-                            <button className={misVotos[comic._id] === "down" ? "activo" : ""} onClick={() => votar(comic, "down")}>▼</button>
-                        )}
-                    </div>
-                    <Link to={`/comic/${comic._id}`}>
-                        <img src={comic.portada} alt={comic.titulo} />
-                    </Link>
-                    <div>
-                        <h3><Link to={`/comic/${comic._id}`}>{comic.titulo}</Link></h3>
-                        <p>{comic.saga} - Vol. {comic.volumen} ({comic.año})</p>
-                        <p>{comic.autor}</p>
-                        <Tags tags={comic.tags} filtro={filtro} />
-                    </div>
-                </div>
-            ))}
+            <div className="comics">
+                {comics.map((comic) => (
+                    <TarjetaComic
+                        key={comic._id}
+                        comic={comic}
+                        filtro={filtro}
+                        miVoto={misVotos[comic._id] ?? null}
+                        puedeVotar={token !== null}
+                        onVotar={(tipo) => votar(comic, tipo)}
+                    />
+                ))}
+            </div>
         </>
     );
 }

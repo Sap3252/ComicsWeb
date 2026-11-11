@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import * as api from "../api/api";
 import type { Comic } from "../api/api";
 import { Comic3D } from "../components/Comic3D";
+import { LeyendaEdicion } from "../components/LeyendaEdicion";
 import { Tags } from "../components/Tags";
 
 // Pública: un cómic con el visor 3D para ver portada y contraportada
@@ -18,20 +19,20 @@ export function ComicDetalle() {
 
     return (
         <>
-            <p><Link to="/">← Volver a la lista</Link></p>
+            <p className="leyenda"><Link to="/">← Volver a la lista</Link></p>
             {error && <p className="error">{error}</p>}
-            {!comic && !error && <p>Cargando...</p>}
+            {!comic && !error && <p className="globo">Cargando...</p>}
 
             {comic && (
                 <div className="detalle">
                     <Comic3D portada={comic.portada} contraportada={comic.contraportada} titulo={comic.titulo} />
-                    <div>
+                    <div className="vineta">
+                        <LeyendaEdicion comic={comic} />
                         <h1>{comic.titulo}</h1>
-                        <p>{comic.saga} - Vol. {comic.volumen} ({comic.año})</p>
                         <p>{comic.autor}</p>
                         <Tags tags={comic.tags} />
-                        <p>Puntaje: <strong>{comic.votos.puntaje}</strong> (▲ {comic.votos.upvotes} / ▼ {comic.votos.downvotes})</p>
-                        <p><small>Arrastrá el cómic para girarlo.</small></p>
+                        <p className="puntaje">Puntaje: <strong>{comic.votos.puntaje}</strong> (▲ {comic.votos.upvotes} / ▼ {comic.votos.downvotes})</p>
+                        <p className="pista">Arrastrá el cómic para girarlo.</p>
                     </div>
                 </div>
             )}

@@ -16,13 +16,13 @@ export function Perfil() {
 
     return (
         <>
-            <h1>Mi perfil</h1>
+            <h1 className="titular">Mi perfil</h1>
             {error && <p className="error">{error}</p>}
             {perfil && (
-                <ul>
-                    <li><strong>Nombre:</strong> {perfil.nombre}</li>
-                    <li><strong>Email:</strong> {perfil.email}</li>
-                    <li><strong>Rol:</strong> {perfil.rol}</li>
+                <ul className="ficha">
+                    <li><strong>Nombre</strong> {perfil.nombre}</li>
+                    <li><strong>Email</strong> {perfil.email}</li>
+                    <li><strong>Rol</strong> {perfil.rol}</li>
                 </ul>
             )}
         </>
