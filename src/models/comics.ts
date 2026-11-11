@@ -1,4 +1,5 @@
 import {Schema, Model, Document, Types, model } from 'mongoose';
+import { MAX_LARGO_TAG, MAX_TAGS, normalizarTags } from '../utils/tags.js';
 
 export interface IComic {
     titulo: string;
@@ -8,6 +9,7 @@ export interface IComic {
     saga: string;
     portada: string;
     contraportada?: string;
+    tags: string[];
     activo: boolean;
 }
 
@@ -55,6 +57,17 @@ const comicSchema = new Schema<IComicDocument>({
         type: String,
         trim: true,
         maxlength: [500, "La contraportada no puede tener más de 500 caracteres"]
+    },
+    // Se guardan normalizados (sin #, en minúsculas y sin acentos) para que la búsqueda no dependa de cómo se escriban
+    tags: {
+        type: [String],
+        default: [],
+        set: normalizarTags,
+        validate: {
+            validator: (tags: string[]) =>
+                tags.length <= MAX_TAGS && tags.every((tag) => tag.length <= MAX_LARGO_TAG),
+            message: `Un cómic puede tener hasta ${MAX_TAGS} tags de ${MAX_LARGO_TAG} caracteres como máximo`
+        }
     },
     activo: {
         type: Boolean,

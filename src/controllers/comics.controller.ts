@@ -3,10 +3,16 @@ import Comic from '../models/comics.js';
 import { HttpError } from '../errors/http-error.js';
 import { getComicActivo } from '../services/comics.service.js';
 import { getResumenVotos, getResumenVotosDe, RESUMEN_VACIO } from '../services/votos.service.js';
+import { normalizarTags } from '../utils/tags.js';
 
-// GET /api/comics
-export const getComics = async (_req: Request, res: Response): Promise<void> => {
-    const comics = await Comic.find({ activo: true });
+// GET /api/comics            -> todos los cómics
+// GET /api/comics?tags=a,b   -> solo los que tienen todos esos tags
+export const getComics = async (req: Request, res: Response): Promise<void> => {
+    const tags = normalizarTags(req.query.tags);
+    const comics = await Comic.find({
+        activo: true,
+        ...(tags.length > 0 ? { tags: { $all: tags } } : {})
+    });
     const votos = await getResumenVotos(comics.map((c) => c._id));
 
     res.json(comics.map((c) => ({

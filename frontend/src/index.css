@@ -38,3 +38,13 @@ td { padding: 4px 8px; }
 .libro .abajo { top: calc(var(--h) - var(--t) / 2); transform: rotateX(-90deg); }
 .piso { position: absolute; left: 50%; top: calc(50% + var(--h) / 2 + 14px); width: calc(var(--w) * 1.1); height: 24px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .35), transparent); pointer-events: none; }
 .comic3d-botones { display: flex; gap: 8px; }
+
+/* Tags y búsqueda por tags */
+.buscador { flex-direction: row; max-width: 480px; margin-bottom: 12px; }
+.buscador input { flex: 1; }
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tag { padding: 1px 8px; border: 1px solid #ccc; border-radius: 999px; background: #f2f2f2; color: inherit; font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
+.tag.activo { background: orange; border-color: orange; }
+.selector-tags { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 8px; border: 1px solid #ccc; font-size: 14px; }
+.nuevo-tag { display: flex; gap: 6px; }
+.nuevo-tag input { flex: 1; min-width: 0; }

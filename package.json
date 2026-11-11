@@ -8,7 +8,6 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "create-admin": "tsx src/scripts/create-admin.ts",
-    "seed": "tsx src/scripts/seed-comics.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

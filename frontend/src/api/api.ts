@@ -25,6 +25,7 @@ export interface Comic {
     saga: string;
     portada: string;
     contraportada?: string;
+    tags: string[];
     votos: Votos;
 }
 
@@ -73,7 +74,9 @@ export const getPerfil = (token: string) =>
     request<Usuario>("/auth/me", "GET", undefined, token);
 
 // Cómics
-export const getComics = () => request<Comic[]>("/comics");
+// Con tags, trae solo los cómics que los tienen todos
+export const getComics = (tags: string[] = []) =>
+    request<Comic[]>(tags.length > 0 ? `/comics?tags=${encodeURIComponent(tags.join(","))}` : "/comics");
 
 export const getComic = (id: string) => request<Comic>(`/comics/${id}`);
 

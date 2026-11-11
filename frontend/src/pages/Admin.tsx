@@ -1,11 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react";
 import * as api from "../api/api";
 import type { Comic, ComicInput } from "../api/api";
+import { SelectorTags } from "../components/SelectorTags";
 import { useAuth } from "../context/AuthContext";
+import { escribirTags } from "../tags";
 
-const VACIO: ComicInput = { titulo: "", año: new Date().getFullYear(), volumen: 1, autor: "", saga: "", portada: "", contraportada: "" };
+const VACIO: ComicInput = { titulo: "", año: new Date().getFullYear(), volumen: 1, autor: "", saga: "", portada: "", contraportada: "", tags: [] };
 
-const CAMPOS: { name: keyof ComicInput; label: string; type: "text" | "number"; opcional?: boolean }[] = [
+// Los tags no están acá: se eligen con SelectorTags
+const CAMPOS: { name: Exclude<keyof ComicInput, "tags">; label: string; type: "text" | "number"; opcional?: boolean }[] = [
     { name: "titulo", label: "Título", type: "text" },
     { name: "saga", label: "Saga", type: "text" },
     { name: "volumen", label: "Volumen", type: "number" },
@@ -23,6 +26,8 @@ export function Admin() {
     const [editandoId, setEditandoId] = useState<string | null>(null);
     const [mensaje, setMensaje] = useState("");
     const [error, setError] = useState("");
+
+    const tagsExistentes = [...new Set(comics.flatMap((comic) => comic.tags))];
 
     const cargar = () => api.getComics().then(setComics).catch((e: Error) => setError(e.message));
 
@@ -43,9 +48,9 @@ export function Admin() {
     };
 
     const editar = (comic: Comic) => {
-        const { titulo, año, volumen, autor, saga, portada } = comic;
+        const { titulo, año, volumen, autor, saga, portada, tags } = comic;
         setEditandoId(comic._id);
-        setForm({ titulo, año, volumen, autor, saga, portada, contraportada: comic.contraportada ?? "" });
+        setForm({ titulo, año, volumen, autor, saga, portada, contraportada: comic.contraportada ?? "", tags });
     };
 
     const cancelar = () => {
@@ -89,6 +94,7 @@ export function Admin() {
                         />
                     </label>
                 ))}
+                <SelectorTags existentes={tagsExistentes} seleccionados={form.tags} onChange={(tags) => setForm({ ...form, tags })} />
                 <button type="submit">{editandoId ? "Guardar cambios" : "Agregar"}</button>
                 {editandoId && <button type="button" onClick={cancelar}>Cancelar</button>}
             </form>
@@ -99,6 +105,7 @@ export function Admin() {
                     {comics.map((comic) => (
                         <tr key={comic._id}>
                             <td>{comic.titulo} (Vol. {comic.volumen})</td>
+                            <td>{escribirTags(comic.tags)}</td>
                             <td>Puntaje: {comic.votos.puntaje}</td>
                             <td>
                                 <button onClick={() => editar(comic)}>Editar</button>
