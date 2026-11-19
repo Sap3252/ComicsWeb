@@ -9,6 +9,7 @@ import { Register } from "./pages/Register";
 import { Perfil } from "./pages/Perfil";
 import { Admin } from "./pages/Admin";
 import { ComicDetalle } from "./pages/ComicDetalle";
+import { Privacidad } from "./pages/Privacidad";
 
 export function App() {
     const { data: sesion } = useSession();
@@ -44,6 +45,7 @@ export function App() {
                     <Route path="/comic/:id" element={<ComicDetalle />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/privacidad" element={<Privacidad />} />
 
                     {/* Rutas privadas: cualquier usuario logueado */}
                     <Route element={<PrivateRoute />}>
