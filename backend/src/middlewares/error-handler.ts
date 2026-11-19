@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
+import { ZodError } from 'zod';
 import { HttpError } from '../errors/http-error.js';
 
 // express.json() lanza este error cuando el body no es JSON válido
@@ -9,6 +10,18 @@ const esBodyInvalido = (error: unknown): boolean =>
 export const errorHandler = (error: unknown, _req: Request, res: Response, _next: NextFunction): void => {
     if (error instanceof HttpError) {
         res.status(error.status).json({ message: error.message });
+        return;
+    }
+
+    // Lo lanza validarBody: un error por campo, para que el frontend pueda mostrar cada uno
+    if (error instanceof ZodError) {
+        res.status(400).json({
+            message: 'Datos inválidos',
+            errores: error.issues.map((issue) => ({
+                campo: issue.path.join('.') || 'body',
+                mensaje: issue.message
+            }))
+        });
         return;
     }
 

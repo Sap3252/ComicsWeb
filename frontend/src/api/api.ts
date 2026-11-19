@@ -32,6 +32,19 @@ export interface RespuestaVoto extends Votos {
     miVoto: TipoVoto | null;
 }
 
+interface RespuestaError {
+    message?: string;
+    error?: string;
+    errores?: { campo: string; mensaje: string }[];
+}
+
+// Los 400 de Zod traen el detalle por campo en "errores"; los de Mongoose, un texto en "error"
+function textoDeError(data: RespuestaError | null, status: number): string {
+    const mensaje = data?.message ?? `Error ${status}`;
+    const detalle = data?.errores?.map(({ campo, mensaje }) => `${campo}: ${mensaje}`).join(" · ") ?? data?.error;
+    return detalle ? `${mensaje} — ${detalle}` : mensaje;
+}
+
 // Hace el fetch y convierte los errores del backend en Error
 async function request<T>(path: string, method = "GET", body?: unknown): Promise<T> {
     const headers: Record<string, string> = {};
@@ -45,8 +58,7 @@ async function request<T>(path: string, method = "GET", body?: unknown): Promise
     const data = await res.json().catch(() => null);
 
     if (!res.ok) {
-        const mensaje = data?.message ?? `Error ${res.status}`;
-        throw new Error(data?.error ? `${mensaje}: ${data.error}` : mensaje);
+        throw new Error(textoDeError(data, res.status));
     }
     return data as T;
 }

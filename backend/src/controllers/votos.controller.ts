@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
 import type { Types } from 'mongoose';
 import Voto from '../models/voto.js';
-import { HttpError } from '../errors/http-error.js';
 import { getComicActivo } from '../services/comics.service.js';
 import { getResumenVotosDe } from '../services/votos.service.js';
+import type { VotoInput } from '../schemas/voto.schema.js';
 
 // Votos del cómic + el voto del usuario logueado
 const respuestaVotos = async (comicId: Types.ObjectId, usuarioId: string) => {
@@ -17,15 +17,10 @@ const respuestaVotos = async (comicId: Types.ObjectId, usuarioId: string) => {
     };
 };
 
-// POST /api/comics/:id/votos  body: { "tipo": "up" | "down" }  (privada)
+// POST /api/comics/:id/votos  body: { "tipo": "up" | "down" }  (privada, body validado con votoSchema)
 // Si el usuario ya había votado, se reemplaza su voto
-export const votar = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
-    const { tipo } = req.body ?? {};
-
-    if (tipo !== "up" && tipo !== "down") {
-        throw new HttpError(400, 'El tipo de voto debe ser "up" o "down"');
-    }
-
+export const votar = async (req: Request<{ id: string }, unknown, VotoInput>, res: Response): Promise<void> => {
+    const { tipo } = req.body;
     const comic = await getComicActivo(req.params.id);
     const usuarioId = req.user!.id;
 

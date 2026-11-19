@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import Comic from '../models/comics.js';
 import { HttpError } from '../errors/http-error.js';
+import type { ComicInput } from '../schemas/comic.schema.js';
 import { getComicActivo } from '../services/comics.service.js';
 import { getResumenVotos, getResumenVotosDe, RESUMEN_VACIO } from '../services/votos.service.js';
 import { normalizarTags } from '../utils/tags.js';
@@ -28,15 +29,15 @@ export const getComicById = async (req: Request<{ id: string }>, res: Response):
     res.json({ ...comic.toObject(), votos: await getResumenVotosDe(comic._id) });
 };
 
-// POST /api/comics
-export const createComic = async (req: Request, res: Response): Promise<void> => {
+// POST /api/comics  (body validado con comicSchema)
+export const createComic = async (req: Request<Record<string, string>, unknown, ComicInput>, res: Response): Promise<void> => {
     const comic = await Comic.create(req.body);
 
     res.status(201).json(comic);
 };
 
-// PUT /api/comics/:id
-export const updateComic = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+// PUT /api/comics/:id  (body validado con comicSchema)
+export const updateComic = async (req: Request<{ id: string }, unknown, ComicInput>, res: Response): Promise<void> => {
     const comic = await Comic.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true
