@@ -17,9 +17,9 @@ export const comicSchema = z.object({
     autor: texto(MAX_LARGO_TEXTO),
     saga: texto(MAX_LARGO_TEXTO),
     portada: urlDeImagen,
-    // "" = sin contraportada: el visor 3D repite la portada
+    // "" = sin contraportada
     contraportada: urlDeImagen.or(z.literal("")),
-    // El largo se chequea sobre la lista y no por tag: así el error queda en un solo lugar del formulario
+    // Se valida la lista entera: el error queda en un solo lugar
     tags: z.array(z.string())
         .max(MAX_TAGS, `No puede tener más de ${MAX_TAGS} tags`)
         .refine((tags) => tags.every((tag) => tag.length <= MAX_LARGO_TAG), `Cada tag puede tener hasta ${MAX_LARGO_TAG} caracteres`)

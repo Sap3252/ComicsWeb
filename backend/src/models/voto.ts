@@ -11,7 +11,7 @@ export interface IVotoDocument extends IVoto, Document {
 }
 
 const votoSchema = new Schema<IVotoDocument>({
-    // Sin ref: los usuarios los maneja Better Auth en su colección "user", no hay modelo de Mongoose
+    // Sin ref: los usuarios están en la colección "user" de Better Auth
     usuario: {
         type: Schema.Types.ObjectId,
         required: [true, "El usuario es obligatorio"]

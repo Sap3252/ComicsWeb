@@ -17,7 +17,7 @@ const respuestaVotos = async (comicId: Types.ObjectId, usuarioId: string) => {
     };
 };
 
-// POST /api/comics/:id/votos  body: { "tipo": "up" | "down" }  (privada, body validado con votoSchema)
+// POST /api/comics/:id/votos  (privada)
 // Si el usuario ya había votado, se reemplaza su voto
 export const votar = async (req: Request<{ id: string }, unknown, VotoInput>, res: Response): Promise<void> => {
     const { tipo } = req.body;

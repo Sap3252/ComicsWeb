@@ -13,7 +13,7 @@ export const errorHandler = (error: unknown, _req: Request, res: Response, _next
         return;
     }
 
-    // Lo lanza validarBody: un error por campo, para que el frontend pueda mostrar cada uno
+    // Lo lanza validarBody: un error por campo
     if (error instanceof ZodError) {
         res.status(400).json({
             message: 'Datos inválidos',

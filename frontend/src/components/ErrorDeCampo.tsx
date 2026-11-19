@@ -1,4 +1,3 @@
-// Mensaje de validación debajo de un campo del formulario
 export function ErrorDeCampo({ mensaje }: { mensaje?: string | undefined }) {
     if (!mensaje) return null;
 

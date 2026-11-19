@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-// Mismos mensajes que el backend (backend/src/schemas): el usuario ve lo mismo valide quien valide.
-// Un input numérico vacío llega como NaN (valueAsNumber), así que también cuenta como "falta"
+// Mismos mensajes que el backend.
+// Un input numérico vacío llega como NaN: cuenta como "falta"
 const errorDeTipo = (esperado: string) => ({
     error: (issue: { input: unknown }) =>
         issue.input === undefined || Number.isNaN(issue.input) ? "Es obligatorio" : `Tiene que ser ${esperado}`

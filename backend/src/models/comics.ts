@@ -58,7 +58,7 @@ const comicSchema = new Schema<IComicDocument>({
         trim: true,
         maxlength: [500, "La contraportada no puede tener más de 500 caracteres"]
     },
-    // Se guardan normalizados (sin #, en minúsculas y sin acentos) para que la búsqueda no dependa de cómo se escriban
+    // Normalizados para que la búsqueda no dependa de cómo se escriban
     tags: {
         type: [String],
         default: [],

@@ -9,7 +9,7 @@ import { leerTags } from "../tags";
 // Las portadas de la primera fila se piden enseguida; el resto, al acercarse a la pantalla
 const PORTADAS_PRIORITARIAS = 4;
 
-// Pública: cualquiera ve los cómics y los busca por tags; los usuarios logueados además pueden votar
+// Pública: cualquiera ve y busca cómics; los usuarios logueados además votan
 export function Home() {
     const { data: sesion, isPending } = useSession();
     const [comics, setComics] = useState<Comic[]>([]);

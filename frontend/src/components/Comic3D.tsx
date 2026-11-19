@@ -14,7 +14,7 @@ const RECORRIDO_REFLEJO = 45;
 
 const rad = (grados: number) => (grados * Math.PI) / 180;
 
-// Variables CSS de luz: cada cara se oscurece al alejarse de la cámara y el reflejo se corre con el giro
+// Variables CSS de luz: oscurecen la cara que se aleja y corren el reflejo con el giro
 function iluminacion({ x, y }: Rotacion) {
     const cos = Math.cos(rad(y));
     return {

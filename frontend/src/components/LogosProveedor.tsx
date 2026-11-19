@@ -1,6 +1,6 @@
-// Logos de los botones de login social. Son SVG en línea para no depender de imágenes externas
+// SVG en línea para no depender de imágenes externas
 
-// El de GitHub usa currentColor: toma el color del texto del botón
+// currentColor: toma el color del texto del botón
 export function LogoGithub() {
     return (
         <svg className="logo-proveedor" viewBox="0 0 16 16" aria-hidden="true">
@@ -12,7 +12,6 @@ export function LogoGithub() {
     );
 }
 
-// El de Google va con sus colores oficiales, como piden sus pautas de marca
 export function LogoGoogle() {
     return (
         <svg className="logo-proveedor" viewBox="0 0 18 18" aria-hidden="true">
