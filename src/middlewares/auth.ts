@@ -1,25 +1,21 @@
 import type { NextFunction, Request, Response } from 'express';
-import { verifyToken } from '../config/jwt.js';
-import type { Rol } from '../models/user.js';
+import { fromNodeHeaders } from 'better-auth/node';
+import { auth, type Rol } from '../config/auth.js';
 
-// Ruta privada: exige un token válido en el header "Authorization: Bearer <token>"
-export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
-    const header = req.headers.authorization;
+// Ruta privada: exige la cookie de sesión de Better Auth
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const sesion = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
 
-    if (!header?.startsWith("Bearer ")) {
-        res.status(401).json({ message: 'No autenticado: falta el token' });
+    if (!sesion) {
+        res.status(401).json({ message: 'No autenticado: iniciá sesión' });
         return;
     }
 
-    try {
-        req.user = verifyToken(header.slice("Bearer ".length));
-        next();
-    } catch (error) {
-        res.status(401).json({ message: 'Token inválido o expirado' });
-    }
+    req.user = { id: sesion.user.id, role: sesion.user.role ?? "user" };
+    next();
 };
 
-// Ruta protegida por rol: se usa DESPUÉS de requireAuth
+// Ruta protegida por rol: se usa DESPUÉS de authMiddleware
 export const requireRole = (...roles: Rol[]) =>
     (req: Request, res: Response, next: NextFunction): void => {
         if (!req.user) {
@@ -27,7 +23,7 @@ export const requireRole = (...roles: Rol[]) =>
             return;
         }
 
-        if (!roles.includes(req.user.rol)) {
+        if (!roles.some((rol) => rol === req.user?.role)) {
             res.status(403).json({ message: `Acceso denegado: se requiere rol ${roles.join(' o ')}` });
             return;
         }

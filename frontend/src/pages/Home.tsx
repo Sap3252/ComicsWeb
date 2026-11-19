@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router";
 import * as api from "../api/api";
 import type { Comic, TipoVoto } from "../api/api";
 import { TarjetaComic } from "../components/TarjetaComic";
-import { useAuth } from "../context/AuthContext";
+import { useSession } from "../api/auth-client";
 import { leerTags } from "../tags";
 
 // Las portadas de la primera fila se piden enseguida; el resto, al acercarse a la pantalla
@@ -11,7 +11,7 @@ const PORTADAS_PRIORITARIAS = 4;
 
 // Pública: cualquiera ve los cómics y los busca por tags; los usuarios logueados además pueden votar
 export function Home() {
-    const { token } = useAuth();
+    const { data: sesion, isPending } = useSession();
     const [comics, setComics] = useState<Comic[]>([]);
     const [cargando, setCargando] = useState(true);
     const [misVotos, setMisVotos] = useState<Record<string, TipoVoto | null>>({});
@@ -45,11 +45,11 @@ export function Home() {
 
     // Como en Reddit: votar lo mismo otra vez quita el voto
     const votar = async (comic: Comic, tipo: TipoVoto) => {
-        if (!token) return;
+        if (!sesion) return;
         try {
             const r = misVotos[comic._id] === tipo
-                ? await api.quitarVoto(comic._id, token)
-                : await api.votar(comic._id, tipo, token);
+                ? await api.quitarVoto(comic._id)
+                : await api.votar(comic._id, tipo);
 
             const { puntaje, upvotes, downvotes } = r;
             setComics((cs) => cs.map((c) => (c._id === r.comicId ? { ...c, votos: { puntaje, upvotes, downvotes } } : c)));
@@ -63,7 +63,7 @@ export function Home() {
         <>
             <h1 className="titular">Cómics</h1>
             {error && <p className="error">{error}</p>}
-            {!token && <p className="leyenda"><Link to="/login">Ingresá</Link> para votar.</p>}
+            {!isPending && !sesion && <p className="leyenda"><Link to="/login">Ingresá</Link> para votar.</p>}
 
             <form className="buscador" onSubmit={buscar}>
                 <input
@@ -103,7 +103,7 @@ export function Home() {
                         comic={comic}
                         filtro={filtro}
                         miVoto={misVotos[comic._id] ?? null}
-                        puedeVotar={token !== null}
+                        puedeVotar={Boolean(sesion)}
                         portadaPrioritaria={posicion < PORTADAS_PRIORITARIAS}
                         onVotar={(tipo) => votar(comic, tipo)}
                     />

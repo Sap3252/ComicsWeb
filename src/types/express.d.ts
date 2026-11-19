@@ -1,9 +1,8 @@
-import type { Rol } from '../models/user.js';
-
-// Datos del usuario autenticado que el middleware requireAuth deja en req.user
+// Datos del usuario autenticado que el middleware authMiddleware deja en req.user
+// role es string y no Rol: Better Auth lo guarda como texto libre
 export interface AuthUser {
     id: string;
-    rol: Rol;
+    role: string;
 }
 
 declare global {

@@ -1,9 +1,6 @@
 // Crea un usuario administrador (o promueve a admin uno existente).
 // Uso: npm run create-admin -- <email> <password> [nombre]
-import "dotenv/config";
-import mongoose from "mongoose";
-import { connectDB } from "../config/db.js";
-import User from "../models/user.js";
+import { auth, authDb, closeAuthDb } from "../config/auth.js";
 
 const [email, password, nombre = "Administrador"] = process.argv.slice(2);
 
@@ -12,17 +9,17 @@ if (!email || !password) {
     process.exit(1);
 }
 
-await connectDB();
+const emailNormalizado = email.toLowerCase().trim();
+const usuarios = authDb.collection("user");
 
-const existente = await User.findOne({ email: email.toLowerCase().trim() });
-
-if (existente) {
-    existente.rol = "admin";
-    await existente.save();
-    console.log(`El usuario ${existente.email} ahora es admin`);
+if (await usuarios.findOne({ email: emailNormalizado })) {
+    // Directo en la base: setRole de Better Auth exige la sesión de otro admin
+    await usuarios.updateOne({ email: emailNormalizado }, { $set: { role: "admin" } });
+    console.log(`El usuario ${emailNormalizado} ahora es admin`);
 } else {
-    const admin = await User.create({ nombre, email, password, rol: "admin" });
-    console.log(`Admin creado: ${admin.email}`);
+    // Llamado desde el servidor, createUser no pide sesión
+    await auth.api.createUser({ body: { email: emailNormalizado, password, name: nombre, role: "admin" } });
+    console.log(`Admin creado: ${emailNormalizado}`);
 }
 
-await mongoose.disconnect();
+await closeAuthDb();

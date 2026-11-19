@@ -2,7 +2,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import * as api from "../api/api";
 import type { Comic, ComicInput } from "../api/api";
 import { SelectorTags } from "../components/SelectorTags";
-import { useAuth } from "../context/AuthContext";
 import { escribirTags } from "../tags";
 
 const VACIO: ComicInput = { titulo: "", año: new Date().getFullYear(), volumen: 1, autor: "", saga: "", portada: "", contraportada: "", tags: [] };
@@ -20,7 +19,6 @@ const CAMPOS: { name: Exclude<keyof ComicInput, "tags">; label: string; type: "t
 
 // Protegida por rol: solo admin. Alta, edición y baja de cómics
 export function Admin() {
-    const { token } = useAuth();
     const [comics, setComics] = useState<Comic[]>([]);
     const [form, setForm] = useState<ComicInput>(VACIO);
     const [editandoId, setEditandoId] = useState<string | null>(null);
@@ -60,18 +58,17 @@ export function Admin() {
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (!token) return;
         const id = editandoId;
         ejecutar(async () => {
-            if (id) await api.editarComic(id, form, token);
-            else await api.crearComic(form, token);
+            if (id) await api.editarComic(id, form);
+            else await api.crearComic(form);
             cancelar();
         }, id ? "Cómic actualizado" : "Cómic creado");
     };
 
     const eliminar = (comic: Comic) => {
-        if (!token || !confirm(`¿Eliminar "${comic.titulo}"?`)) return;
-        ejecutar(() => api.eliminarComic(comic._id, token), "Cómic eliminado");
+        if (!confirm(`¿Eliminar "${comic.titulo}"?`)) return;
+        ejecutar(() => api.eliminarComic(comic._id), "Cómic eliminado");
     };
 
     return (

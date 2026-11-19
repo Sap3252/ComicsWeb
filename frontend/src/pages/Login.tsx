@@ -1,11 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import { Link, Navigate, useLocation } from "react-router";
+import { mensajeDeError, signIn, useSession } from "../api/auth-client";
 
 // Pública
 export function Login() {
-    const { login } = useAuth();
-    const navigate = useNavigate();
+    const { data: sesion } = useSession();
     const location = useLocation();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -16,13 +15,21 @@ export function Login() {
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        try {
-            await login(email, password);
-            navigate(destino, { replace: true });
-        } catch (err) {
-            setError((err as Error).message);
-        }
+        const { error } = await signIn.email({ email, password });
+        if (error) setError(mensajeDeError(error));
     };
+
+    // Sale de la app hacia GitHub; al volver, Better Auth crea la sesión y redirige a callbackURL
+    const ingresarConGithub = async () => {
+        const { error } = await signIn.social({ provider: "github", callbackURL: destino });
+        if (error) setError(mensajeDeError(error));
+    };
+
+    // Se redirige cuando useSession ya tiene la sesión, no apenas responde signIn:
+    // si no, la ruta de destino todavía no la ve y vuelve a mandar al login
+    if (sesion) {
+        return <Navigate to={destino} replace />;
+    }
 
     return (
         <form className="acceso" onSubmit={onSubmit}>
@@ -31,6 +38,7 @@ export function Login() {
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required />
             <button type="submit">Ingresar</button>
+            <button type="button" onClick={ingresarConGithub}>Ingresar con GitHub</button>
             <p>¿No tenés cuenta? <Link to="/register">Registrate</Link></p>
         </form>
     );

@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import { mensajeDeError, signUp } from "../api/auth-client";
 
-// Pública
+// Mínimo que exige Better Auth por defecto
+const LARGO_MINIMO_PASSWORD = 8;
+
+// Pública. El rol lo asigna el backend: todo registro nuevo es "user"
 export function Register() {
-    const { register } = useAuth();
     const navigate = useNavigate();
     const [nombre, setNombre] = useState("");
     const [email, setEmail] = useState("");
@@ -13,12 +15,12 @@ export function Register() {
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        try {
-            await register(nombre, email, password);
-            navigate("/", { replace: true });
-        } catch (err) {
-            setError((err as Error).message);
+        const { error } = await signUp.email({ name: nombre, email, password });
+        if (error) {
+            setError(mensajeDeError(error));
+            return;
         }
+        navigate("/", { replace: true });
     };
 
     return (
@@ -27,7 +29,14 @@ export function Register() {
             {error && <p className="error">{error}</p>}
             <input placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <input type="password" placeholder="Contraseña (mínimo 6)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            <input
+                type="password"
+                placeholder={`Contraseña (mínimo ${LARGO_MINIMO_PASSWORD})`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={LARGO_MINIMO_PASSWORD}
+            />
             <button type="submit">Crear cuenta</button>
             <p>¿Ya tenés cuenta? <Link to="/login">Ingresá</Link></p>
         </form>
