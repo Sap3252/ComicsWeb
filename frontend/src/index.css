@@ -1,26 +1,368 @@
-body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 16px; }
-nav { display: flex; gap: 12px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #ccc; }
-form { display: flex; flex-direction: column; gap: 8px; max-width: 320px; margin-bottom: 24px; }
-label { display: flex; flex-direction: column; font-size: 14px; }
-.comic { display: flex; gap: 16px; align-items: center; border-bottom: 1px solid #eee; padding: 8px 0; }
-.comic img { width: 60px; }
-.comic h3, .comic p { margin: 2px 0; }
-.votos { display: flex; flex-direction: column; align-items: center; }
-.activo { background: orange; }
-.error { color: crimson; }
-.ok { color: green; }
-td { padding: 4px 8px; }
+/* Estilo de cómic impreso: tinta gruesa, trama de puntos, colores corridos como una
+   imprenta mal registrada y animaciones a saltos (steps) en vez de suaves */
+:root {
+    --tinta: #0a0a0f;
+    --papel: #fff8e1;
+    --amarillo: #ffe600;
+    --magenta: #ff2a7f;
+    --cian: #19e3ff;
+    --rojo: #ff2b2b;
+    --violeta: #5b21d6;
+    --verde: #00a86b;
+    --naranja: #ffb400;
+    --gris: #8a8478;
+    --resalte: #fffbd0;
+    --noche: #140a26;
+    --borde: 3px solid var(--tinta);
+    /* sombra dura en dos colores: el "fuera de registro" del cian y el magenta */
+    --registro: -4px -4px 0 var(--cian), 6px 6px 0 var(--magenta);
+    --titulos: "Bangers", "Impact", "Arial Black", sans-serif;
+    --texto: "Comic Neue", "Comic Sans MS", "Trebuchet MS", sans-serif;
+
+    /* Lo que cambia con el tema: la página que queda por fuera de las viñetas. Oscuro por defecto */
+    --fondo: linear-gradient(135deg, #2a0f52 0%, var(--noche) 45%, #07060d 100%);
+    --fondo-base: var(--noche);
+    --trama: .5;
+    --sobre-fondo: var(--papel);
+    --enlace: var(--cian);
+    --enlace-activo: var(--amarillo);
+    --foco: var(--cian);
+    --titular: var(--amarillo);
+    --titular-eco: var(--magenta);
+    --subtitulo: var(--cian);
+    --subtitulo-eco: var(--tinta);
+    color-scheme: dark;
+}
+
+/* Tema claro: papel de diario amarillento, con las viñetas en blanco */
+:root[data-tema="claro"] {
+    --papel: #fffdf6;
+    --fondo: linear-gradient(135deg, #ffe27a 0%, #fbeecb 40%, #ffd3e2 100%);
+    --fondo-base: #fbeecb;
+    --trama: .6;
+    --sobre-fondo: var(--tinta);
+    --enlace: var(--violeta);
+    --enlace-activo: var(--rojo);
+    --foco: var(--violeta);
+    --titular: var(--rojo);
+    --titular-eco: var(--amarillo);
+    --subtitulo: var(--violeta);
+    --subtitulo-eco: var(--amarillo);
+    color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* scrollbar-gutter: la barra de scroll aparece al cargar la lista y si no corre todo de lugar */
+html { background: var(--fondo-base); scrollbar-gutter: stable; }
+body {
+    min-height: 100vh;
+    margin: 0 auto;
+    max-width: 1100px;
+    padding: 16px 20px 64px;
+    color: var(--sobre-fondo);
+    font-family: var(--texto);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+/* Fondo fijo: el color del tema con trama de puntos que se desvanece en diagonal */
+body::before, body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+body::before { background: var(--fondo); }
+body::after {
+    background:
+        radial-gradient(circle, var(--magenta) 0 2.5px, transparent 3px) 0 0 / 16px 16px,
+        radial-gradient(circle, var(--cian) 0 2px, transparent 2.5px) 8px 8px / 16px 16px;
+    opacity: var(--trama);
+    mask-image: linear-gradient(120deg, #000 0%, transparent 32%, transparent 68%, #000 100%);
+}
+
+h1, h2, h3 { margin: 0 0 12px; font-family: var(--titulos); font-weight: 400; letter-spacing: .04em; line-height: 1.05; }
+h1 { font-size: 2.4rem; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.4rem; }
+p { margin: 0 0 12px; }
+a { color: var(--enlace); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { color: var(--enlace-activo); }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 3px; }
+::selection { background: var(--magenta); color: #fff; }
+
+/* Titular de página: letras grandes con los colores corridos y un temblor cada tanto */
+.titular {
+    display: inline-block;
+    margin: 28px 0 20px;
+    color: var(--titular);
+    font-size: clamp(3rem, 9vw, 5.5rem);
+    text-transform: uppercase;
+    transform: rotate(-2deg) skewX(-6deg);
+    text-shadow: 4px 4px 0 var(--titular-eco), -3px -3px 0 var(--cian), 7px 7px 0 var(--tinta);
+    animation: temblor 4s steps(1) infinite;
+}
+@keyframes temblor {
+    0%, 86%, 100% { text-shadow: 4px 4px 0 var(--titular-eco), -3px -3px 0 var(--cian), 7px 7px 0 var(--tinta); translate: 0 0; }
+    88% { text-shadow: -6px 2px 0 var(--titular-eco), 6px -2px 0 var(--cian), 7px 7px 0 var(--tinta); translate: 3px -1px; }
+    91% { text-shadow: 7px -3px 0 var(--titular-eco), -7px 3px 0 var(--cian), 7px 7px 0 var(--tinta); translate: -3px 1px; }
+    94% { text-shadow: 2px 5px 0 var(--titular-eco), -2px -5px 0 var(--cian), 7px 7px 0 var(--tinta); translate: 1px 0; }
+}
+
+/* Cartucho de narrador: la cajita amarilla de "Mientras tanto..." */
+.leyenda {
+    width: fit-content;
+    margin: 0 0 12px;
+    padding: 4px 12px;
+    border: var(--borde);
+    background: var(--amarillo);
+    color: var(--tinta);
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    box-shadow: 3px 3px 0 var(--tinta);
+}
+.leyenda a { color: var(--violeta); }
+.leyenda a:hover { color: var(--rojo); }
+
+/* Globo de diálogo, con su colita */
+.globo {
+    position: relative;
+    display: inline-block;
+    margin: 8px 0 28px;
+    padding: 12px 20px;
+    border: var(--borde);
+    border-radius: 28px;
+    background: #fff;
+    color: var(--tinta);
+}
+.globo::before, .globo::after { content: ""; position: absolute; left: 34px; border-style: solid; border-color: transparent; }
+.globo::before { bottom: -22px; border-width: 22px 18px 0 4px; border-top-color: var(--tinta); }
+.globo::after { bottom: -13px; left: 37px; border-width: 15px 11px 0 2px; border-top-color: #fff; }
+
+/* Viñeta: panel de papel con borde de tinta */
+.vineta, form, .tabla, .ficha {
+    border: var(--borde);
+    background: var(--papel);
+    color: var(--tinta);
+    box-shadow: var(--registro);
+}
+:is(.vineta, form, .tabla) a:not(.tag) { color: var(--violeta); }
+:is(.vineta, form, .tabla) a:not(.tag):hover { color: var(--rojo); }
+
+/* Barra de navegación */
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    align-items: center;
+    padding: 10px 16px;
+    border: var(--borde);
+    background: var(--tinta);
+    box-shadow: var(--registro);
+    transform: rotate(-.4deg);
+}
+nav a {
+    padding: 2px 10px;
+    color: var(--papel);
+    font-family: var(--titulos);
+    font-weight: 400;
+    font-size: 1.3rem;
+    letter-spacing: .05em;
+    text-decoration: none;
+    transform: skewX(-8deg);
+}
+nav a:hover, nav a[aria-current="page"] { background: var(--amarillo); color: var(--tinta); }
+nav .marca {
+    margin-right: auto;
+    padding: 0 6px;
+    color: var(--amarillo);
+    font-size: 2rem;
+    text-shadow: 2px 2px 0 var(--magenta), -2px -2px 0 var(--cian);
+}
+nav .marca:hover { background: none; color: #fff; }
+nav .boton-tema { padding: 2px 10px; font-size: 1rem; }
+nav .leyenda { margin: 0; font-size: .85rem; transform: rotate(1.5deg); box-shadow: none; }
+
+main { margin-top: 28px; }
+
+/* Botones: etiqueta amarilla que se hunde al apretarla */
+button {
+    padding: 5px 14px;
+    border: var(--borde);
+    background: var(--amarillo);
+    color: var(--tinta);
+    font-family: var(--titulos);
+    font-size: 1.1rem;
+    letter-spacing: .06em;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--magenta);
+    transition: translate .1s steps(2), box-shadow .1s steps(2);
+}
+button:hover { background: #fff; translate: -1px -1px; box-shadow: 4px 4px 0 var(--magenta); }
+button:active { translate: 3px 3px; box-shadow: 0 0 0 var(--magenta); }
+button.activo { background: var(--magenta); color: #fff; box-shadow: 3px 3px 0 var(--cian); }
+button.peligro { background: var(--rojo); color: #fff; }
+button.peligro:hover { background: var(--tinta); }
+
+/* Formularios */
+form { display: flex; flex-direction: column; gap: 12px; max-width: 420px; margin: 28px 0; padding: 20px; }
+form.acceso { margin: 48px auto; transform: rotate(-1deg); }
+form h1, form h2 { color: var(--tinta); text-shadow: 2px 2px 0 var(--amarillo); }
+form p { margin: 0; }
+label { display: flex; flex-direction: column; gap: 3px; font-size: .9rem; text-transform: uppercase; letter-spacing: .03em; }
+input {
+    padding: 8px 10px;
+    border: var(--borde);
+    border-radius: 0;
+    background: #fff;
+    color: var(--tinta);
+    font: inherit;
+    font-size: 1rem;
+    text-transform: none;
+}
+input::placeholder { color: var(--gris); font-weight: 400; }
+input:focus { outline: none; background: var(--resalte); box-shadow: 4px 4px 0 var(--cian); }
+.acciones { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Mensajes: estallidos inclinados */
+.error, .ok {
+    width: fit-content;
+    padding: 6px 14px;
+    border: var(--borde);
+    color: #fff;
+    font-family: var(--titulos);
+    font-weight: 400;
+    font-size: 1.2rem;
+    letter-spacing: .05em;
+    transform: rotate(-1.5deg);
+    box-shadow: 4px 4px 0 var(--tinta);
+}
+.error { background: var(--rojo); }
+.error::before { content: "¡Ups! "; color: var(--amarillo); }
+.ok { background: var(--verde); }
+.ok::before { content: "¡Bam! "; color: var(--amarillo); }
+
+/* Lista de cómics: una grilla de viñetas torcidas que se enderezan al pasar el mouse */
+.comics { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 36px 30px; margin-top: 28px; }
+.comic {
+    display: flex;
+    flex-direction: column;
+    border: var(--borde);
+    background: var(--papel);
+    color: var(--tinta);
+    box-shadow: var(--registro);
+    transform: rotate(-1.2deg);
+    transition: transform .18s steps(3), box-shadow .18s steps(3);
+}
+.comic:nth-child(even) { transform: rotate(1deg); }
+.comic:nth-child(3n) { transform: rotate(-.4deg) translateY(6px); }
+.comic:hover, .comic:focus-within {
+    z-index: 1;
+    transform: rotate(0) scale(1.05);
+    box-shadow: -7px -7px 0 var(--cian), 10px 10px 0 var(--magenta);
+}
+.comic-portada { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; border-bottom: var(--borde); background: var(--tinta); }
+.comic-portada img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* trama de puntos sobre la portada, que aparece al pasar el mouse */
+.comic-portada::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, var(--tinta) 0 1.2px, transparent 1.6px) 0 0 / 6px 6px;
+    mix-blend-mode: multiply;
+    opacity: 0;
+    transition: opacity .18s steps(2);
+}
+.comic:hover .comic-portada::after { opacity: .28; }
+.comic-info { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px; }
+.comic-info h3, .comic-info p { margin: 0; }
+.comic-info h3 a { color: var(--tinta); text-decoration: none; }
+.comic-info h3 a:hover { color: var(--magenta); }
+.comic-info .leyenda { padding: 1px 8px; font-size: .78rem; box-shadow: none; }
+.comic-info .autor { font-size: .9rem; }
+
+/* Votos: tira de tinta al pie de la viñeta, con el puntaje al centro */
+.votos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    padding: 6px 10px;
+    border-top: var(--borde);
+    background: var(--tinta);
+}
+.votos strong { flex: 1; color: var(--amarillo); font-family: var(--titulos); font-weight: 400; font-size: 1.6rem; line-height: 1; letter-spacing: .04em; text-align: center; }
+.votos button { padding: 1px 12px; border-color: var(--papel); background: var(--tinta); color: var(--papel); font-family: var(--texto); font-size: .9rem; box-shadow: none; }
+.votos button:hover { background: var(--papel); color: var(--tinta); translate: none; box-shadow: none; }
+.votos button:active { translate: 0 2px; }
+/* el voto propio: magenta a favor, cian en contra */
+.votos button.activo { border-color: var(--magenta); background: var(--magenta); color: #fff; }
+.votos button.activo.contra { border-color: var(--cian); background: var(--cian); color: var(--tinta); }
+
+/* Buscador y tags */
+.buscador {
+    flex-direction: row;
+    max-width: 560px;
+    margin: 0 0 16px;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+}
+.buscador input { flex: 1; min-width: 0; box-shadow: 4px 4px 0 var(--cian); }
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; }
+.tag {
+    padding: 1px 9px;
+    border: 2px solid var(--tinta);
+    background: #fff;
+    color: var(--tinta);
+    font-family: var(--texto);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: none;
+    transform: skewX(-8deg);
+}
+.tag:hover { background: var(--cian); color: var(--tinta); translate: none; box-shadow: none; }
+.tag.activo { background: var(--magenta); color: #fff; }
+.filtro { margin: 0 0 12px; gap: 8px; }
+.filtro .tag { font-size: .95rem; }
+.selector-tags { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 10px; border: 3px dashed var(--tinta); font-size: .9rem; }
+.selector-tags legend { padding: 0 6px; text-transform: uppercase; }
+.nuevo-tag { display: flex; gap: 8px; }
+.nuevo-tag input { flex: 1; min-width: 0; }
 
 /* Detalle de un cómic */
-.detalle { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
-.detalle h1 { margin-top: 0; }
+.detalle { display: flex; flex-wrap: wrap; gap: 36px; align-items: flex-start; margin-top: 12px; }
+.detalle .vineta { flex: 1; min-width: 260px; padding: 22px; transform: rotate(.6deg); }
+.detalle h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); text-transform: uppercase; text-shadow: 3px 3px 0 var(--amarillo); }
+.puntaje { font-family: var(--titulos); font-weight: 400; font-size: 1.4rem; letter-spacing: .04em; }
+.puntaje strong { display: inline-block; padding: 0 12px; border: var(--borde); background: var(--magenta); color: #fff; font-weight: 400; font-size: 2rem; transform: rotate(-4deg); box-shadow: 3px 3px 0 var(--tinta); }
+.pista { margin: 0; font-size: .85rem; font-style: italic; }
 
 /* Visor 3D (components/Comic3D.tsx): la portada y la contraportada espalda con espalda,
-   separadas por el grosor del lomo y los cantos. Selectores con .libro para ganarle a .comic img */
-.comic3d { --w: 220px; --h: 330px; --t: 10px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 300px; max-width: 100%; }
-.escena { position: relative; display: grid; place-items: center; width: 100%; height: calc(var(--h) + 90px); perspective: 1000px; background: #f2f2f2; border-radius: 8px; cursor: grab; touch-action: pan-y; user-select: none; }
+   separadas por el grosor del lomo y los cantos */
+.comic3d { --w: 220px; --h: 330px; --t: 10px; display: flex; flex-direction: column; align-items: center; gap: 18px; width: 320px; max-width: 100%; }
+/* fondo de la escena: rayos de acción con trama de puntos encima */
+.escena {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: calc(var(--h) + 90px);
+    perspective: 1000px;
+    border: var(--borde);
+    background:
+        radial-gradient(circle, rgba(10, 10, 15, .22) 0 1.5px, transparent 2px) 0 0 / 9px 9px,
+        radial-gradient(circle, #fff 0 18%, transparent 60%),
+        repeating-conic-gradient(from 0deg, var(--amarillo) 0 9deg, var(--naranja) 9deg 18deg);
+    box-shadow: var(--registro);
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+}
 .escena:active { cursor: grabbing; }
-.escena:focus-visible { outline: 3px solid orange; outline-offset: 3px; }
+.escena:focus-visible { outline: 3px solid var(--foco); outline-offset: 6px; }
 .libro { position: relative; width: var(--w); height: var(--h); transform-style: preserve-3d; }
 .libro > div { position: absolute; backface-visibility: hidden; }
 .libro .cara { inset: 0; overflow: hidden; }
@@ -36,15 +378,34 @@ td { padding: 4px 8px; }
 .libro .arriba, .libro .abajo { left: 0; width: var(--w); height: var(--t); background: repeating-linear-gradient(0deg, #f5f0e3 0 1px, #d3cab5 1px 2px); }
 .libro .arriba { top: calc(var(--t) / -2); transform: rotateX(90deg); }
 .libro .abajo { top: calc(var(--h) - var(--t) / 2); transform: rotateX(-90deg); }
-.piso { position: absolute; left: 50%; top: calc(50% + var(--h) / 2 + 14px); width: calc(var(--w) * 1.1); height: 24px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .35), transparent); pointer-events: none; }
-.comic3d-botones { display: flex; gap: 8px; }
+.piso { position: absolute; left: 50%; top: calc(50% + var(--h) / 2 + 14px); width: calc(var(--w) * 1.1); height: 24px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .55), transparent); pointer-events: none; }
+.comic3d-botones { display: flex; gap: 10px; }
 
-/* Tags y búsqueda por tags */
-.buscador { flex-direction: row; max-width: 480px; margin-bottom: 12px; }
-.buscador input { flex: 1; }
-.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.tag { padding: 1px 8px; border: 1px solid #ccc; border-radius: 999px; background: #f2f2f2; color: inherit; font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
-.tag.activo { background: orange; border-color: orange; }
-.selector-tags { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 8px; border: 1px solid #ccc; font-size: 14px; }
-.nuevo-tag { display: flex; gap: 6px; }
-.nuevo-tag input { flex: 1; min-width: 0; }
+/* Admin: tabla de cómics cargados */
+.tabla { margin-top: 12px; padding: 6px 14px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+td { padding: 10px 8px; border-bottom: 2px dashed var(--tinta); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-family: var(--titulos); font-weight: 400; font-size: 1.2rem; letter-spacing: .04em; }
+td:last-child { white-space: nowrap; }
+td button { margin-left: 8px; padding: 2px 10px; font-size: .95rem; }
+.subtitulo { display: inline-block; margin-top: 16px; color: var(--subtitulo); font-size: 2rem; text-shadow: 2px 2px 0 var(--subtitulo-eco), 4px 4px 0 var(--magenta); transform: skewX(-6deg); }
+
+/* Perfil: ficha de identidad */
+.ficha { max-width: 440px; margin: 8px 0 0; padding: 20px 24px; list-style: none; transform: rotate(-1deg); }
+.ficha li { padding: 8px 0; border-bottom: 2px dashed var(--tinta); font-size: 1.1rem; }
+.ficha li:last-child { border-bottom: 0; }
+.ficha strong { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--violeta); }
+
+@media (max-width: 520px) {
+    body { padding: 12px 16px 48px; font-size: 16px; }
+    .comics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 20px; }
+    .comic-info { padding: 8px; }
+    .comic-info h3 { font-size: 1.15rem; }
+    nav .marca { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .titular { animation: none; }
+    .comic, button { transition: none; }
+}

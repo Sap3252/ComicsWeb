@@ -1,5 +1,6 @@
-import { Link, Navigate, Route, Routes } from "react-router";
+import { Link, Navigate, NavLink, Route, Routes } from "react-router";
 import { useAuth } from "./context/AuthContext";
+import { useTema } from "./hooks/useTema";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { RoleRoute } from "./components/RoleRoute";
 import { Home } from "./pages/Home";
@@ -11,24 +12,29 @@ import { ComicDetalle } from "./pages/ComicDetalle";
 
 export function App() {
     const { user, logout } = useAuth();
+    const { tema, alternar } = useTema();
 
     return (
         <>
             <nav>
-                <Link to="/">Inicio</Link>
+                <Link to="/" className="marca">ComicsWeb</Link>
+                <NavLink to="/" end>Inicio</NavLink>
                 {user ? (
                     <>
-                        <Link to="/perfil">Perfil</Link>
-                        {user.rol === "admin" && <Link to="/admin">Admin</Link>}
-                        <span>Hola, {user.nombre}</span>
+                        <NavLink to="/perfil">Perfil</NavLink>
+                        {user.rol === "admin" && <NavLink to="/admin">Admin</NavLink>}
+                        <span className="leyenda">Hola, {user.nombre}</span>
                         <button onClick={logout}>Salir</button>
                     </>
                 ) : (
                     <>
-                        <Link to="/login">Ingresar</Link>
-                        <Link to="/register">Registrarse</Link>
+                        <NavLink to="/login">Ingresar</NavLink>
+                        <NavLink to="/register">Registrarse</NavLink>
                     </>
                 )}
+                <button className="boton-tema" onClick={alternar}>
+                    {tema === "oscuro" ? "☀ Modo claro" : "☾ Modo oscuro"}
+                </button>
             </nav>
 
             <main>

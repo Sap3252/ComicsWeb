@@ -25,7 +25,7 @@ export function Login() {
     };
 
     return (
-        <form onSubmit={onSubmit}>
+        <form className="acceso" onSubmit={onSubmit}>
             <h1>Ingresar</h1>
             {error && <p className="error">{error}</p>}
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />

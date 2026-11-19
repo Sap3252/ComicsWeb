@@ -22,7 +22,7 @@ export function Register() {
     };
 
     return (
-        <form onSubmit={onSubmit}>
+        <form className="acceso" onSubmit={onSubmit}>
             <h1>Registrarse</h1>
             {error && <p className="error">{error}</p>}
             <input placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
