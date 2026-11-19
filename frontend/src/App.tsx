@@ -1,5 +1,5 @@
 import { Link, Navigate, NavLink, Route, Routes } from "react-router";
-import { useAuth } from "./context/AuthContext";
+import { signOut, useSession } from "./api/auth-client";
 import { useTema } from "./hooks/useTema";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { RoleRoute } from "./components/RoleRoute";
@@ -11,7 +11,7 @@ import { Admin } from "./pages/Admin";
 import { ComicDetalle } from "./pages/ComicDetalle";
 
 export function App() {
-    const { user, logout } = useAuth();
+    const { data: sesion } = useSession();
     const { tema, alternar } = useTema();
 
     return (
@@ -19,12 +19,12 @@ export function App() {
             <nav>
                 <Link to="/" className="marca">ComicsWeb</Link>
                 <NavLink to="/" end>Inicio</NavLink>
-                {user ? (
+                {sesion ? (
                     <>
                         <NavLink to="/perfil">Perfil</NavLink>
-                        {user.rol === "admin" && <NavLink to="/admin">Admin</NavLink>}
-                        <span className="leyenda">Hola, {user.nombre}</span>
-                        <button onClick={logout}>Salir</button>
+                        {sesion.user.role === "admin" && <NavLink to="/admin">Admin</NavLink>}
+                        <span className="leyenda">Hola, {sesion.user.name}</span>
+                        <button onClick={() => signOut()}>Salir</button>
                     </>
                 ) : (
                     <>

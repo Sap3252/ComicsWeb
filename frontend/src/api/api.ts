@@ -1,14 +1,8 @@
-// URL del backend. Se puede cambiar con VITE_API_URL en frontend/.env
-const API_URL: string = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
+// Mismo origen que el frontend: Vite (en local) y Render (en producción) reenvían /api al backend.
+// Así el navegador manda la cookie de sesión de Better Auth en cada pedido
+const API_URL = "/api";
 
-export type Rol = "usuario" | "admin";
-
-export interface Usuario {
-    id: string;
-    nombre: string;
-    email: string;
-    rol: Rol;
-}
+export type Rol = "user" | "admin";
 
 export interface Votos {
     puntaje: number;
@@ -38,16 +32,23 @@ export interface RespuestaVoto extends Votos {
     miVoto: TipoVoto | null;
 }
 
-export interface RespuestaAuth {
-    token: string;
-    user: Usuario;
+interface RespuestaError {
+    message?: string;
+    error?: string;
+    errores?: { campo: string; mensaje: string }[];
 }
 
-// Hace el fetch, agrega el token si hay y convierte los errores del backend en Error
-async function request<T>(path: string, method = "GET", body?: unknown, token?: string | null): Promise<T> {
+// Los 400 de Zod traen el detalle por campo en "errores"; los de Mongoose, un texto en "error"
+function textoDeError(data: RespuestaError | null, status: number): string {
+    const mensaje = data?.message ?? `Error ${status}`;
+    const detalle = data?.errores?.map(({ campo, mensaje }) => `${campo}: ${mensaje}`).join(" · ") ?? data?.error;
+    return detalle ? `${mensaje} — ${detalle}` : mensaje;
+}
+
+// Hace el fetch y convierte los errores del backend en Error
+async function request<T>(path: string, method = "GET", body?: unknown): Promise<T> {
     const headers: Record<string, string> = {};
     if (body !== undefined) headers["Content-Type"] = "application/json";
-    if (token) headers["Authorization"] = `Bearer ${token}`;
 
     const res = await fetch(API_URL + path, {
         method,
@@ -57,21 +58,10 @@ async function request<T>(path: string, method = "GET", body?: unknown, token?: 
     const data = await res.json().catch(() => null);
 
     if (!res.ok) {
-        const mensaje = data?.message ?? `Error ${res.status}`;
-        throw new Error(data?.error ? `${mensaje}: ${data.error}` : mensaje);
+        throw new Error(textoDeError(data, res.status));
     }
     return data as T;
 }
-
-// Auth
-export const login = (email: string, password: string) =>
-    request<RespuestaAuth>("/auth/login", "POST", { email, password });
-
-export const register = (nombre: string, email: string, password: string) =>
-    request<RespuestaAuth>("/auth/register", "POST", { nombre, email, password });
-
-export const getPerfil = (token: string) =>
-    request<Usuario>("/auth/me", "GET", undefined, token);
 
 // Cómics
 // Con tags, trae solo los cómics que los tienen todos
@@ -80,18 +70,18 @@ export const getComics = (tags: string[] = []) =>
 
 export const getComic = (id: string) => request<Comic>(`/comics/${id}`);
 
-export const crearComic = (comic: ComicInput, token: string) =>
-    request<Comic>("/comics", "POST", comic, token);
+export const crearComic = (comic: ComicInput) =>
+    request<Comic>("/comics", "POST", comic);
 
-export const editarComic = (id: string, comic: ComicInput, token: string) =>
-    request<Comic>(`/comics/${id}`, "PUT", comic, token);
+export const editarComic = (id: string, comic: ComicInput) =>
+    request<Comic>(`/comics/${id}`, "PUT", comic);
 
-export const eliminarComic = (id: string, token: string) =>
-    request<{ message: string }>(`/comics/${id}`, "DELETE", undefined, token);
+export const eliminarComic = (id: string) =>
+    request<{ message: string }>(`/comics/${id}`, "DELETE");
 
 // Votos
-export const votar = (id: string, tipo: TipoVoto, token: string) =>
-    request<RespuestaVoto>(`/comics/${id}/votos`, "POST", { tipo }, token);
+export const votar = (id: string, tipo: TipoVoto) =>
+    request<RespuestaVoto>(`/comics/${id}/votos`, "POST", { tipo });
 
-export const quitarVoto = (id: string, token: string) =>
-    request<RespuestaVoto>(`/comics/${id}/votos`, "DELETE", undefined, token);
+export const quitarVoto = (id: string) =>
+    request<RespuestaVoto>(`/comics/${id}/votos`, "DELETE");

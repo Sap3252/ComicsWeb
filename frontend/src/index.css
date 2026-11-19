@@ -221,6 +221,10 @@ input::placeholder { color: var(--gris); font-weight: 400; }
 input:focus { outline: none; background: var(--resalte); box-shadow: 4px 4px 0 var(--cian); }
 .acciones { display: flex; flex-wrap: wrap; gap: 10px; }
 
+/* Errores de validación por campo (React Hook Form + Zod) */
+input[aria-invalid="true"] { border-color: var(--rojo); box-shadow: 3px 3px 0 var(--rojo); }
+.error-campo { color: var(--rojo); font-size: .85rem; font-weight: 700; text-transform: none; letter-spacing: 0; }
+
 /* Mensajes: estallidos inclinados */
 .error, .ok {
     width: fit-content;

@@ -1,30 +1,20 @@
-import { useEffect, useState } from "react";
-import * as api from "../api/api";
-import type { Usuario } from "../api/api";
-import { useAuth } from "../context/AuthContext";
+import { useSession } from "../api/auth-client";
 
-// Privada: los datos se piden a GET /api/auth/me, que también es privada en el backend
+// Privada: PrivateRoute ya esperó la sesión
 export function Perfil() {
-    const { token } = useAuth();
-    const [perfil, setPerfil] = useState<Usuario | null>(null);
-    const [error, setError] = useState("");
+    const { data: sesion } = useSession();
 
-    useEffect(() => {
-        if (!token) return;
-        api.getPerfil(token).then(setPerfil).catch((e: Error) => setError(e.message));
-    }, [token]);
+    // Nunca pasa detrás de PrivateRoute; el if es para que TypeScript sepa que hay sesión
+    if (!sesion) return null;
 
     return (
         <>
             <h1 className="titular">Mi perfil</h1>
-            {error && <p className="error">{error}</p>}
-            {perfil && (
-                <ul className="ficha">
-                    <li><strong>Nombre</strong> {perfil.nombre}</li>
-                    <li><strong>Email</strong> {perfil.email}</li>
-                    <li><strong>Rol</strong> {perfil.rol}</li>
-                </ul>
-            )}
+            <ul className="ficha">
+                <li><strong>Nombre</strong> {sesion.user.name}</li>
+                <li><strong>Email</strong> {sesion.user.email}</li>
+                <li><strong>Rol</strong> {sesion.user.role}</li>
+            </ul>
         </>
     );
 }
