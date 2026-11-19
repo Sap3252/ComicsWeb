@@ -63,7 +63,6 @@ export function Admin() {
         reset(VACIO);
     };
 
-    // Solo se llama si el formulario pasó comicSchema; los errores por campo los muestra ErrorDeCampo
     const onSubmit = (comic: ComicForm) => {
         const id = editandoId;
         return ejecutar(async () => {

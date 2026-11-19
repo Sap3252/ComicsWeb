@@ -23,7 +23,7 @@ const enteroPositivo = z.number(errorDeTipo('un número'))
 const urlDeImagen = texto(MAX_LARGO_URL)
     .pipe(z.url({ protocol: /^https?$/, error: 'Tiene que ser una URL que empiece con http:// o https://' }));
 
-// Sin "activo": la baja se hace solo con DELETE. Los campos que no están acá se descartan
+// Sin "activo": la baja es solo con DELETE
 export const comicSchema = z.object({
     titulo: texto(MAX_LARGO_TEXTO),
     año: enteroPositivo,
@@ -31,7 +31,7 @@ export const comicSchema = z.object({
     autor: texto(MAX_LARGO_TEXTO),
     saga: texto(MAX_LARGO_TEXTO),
     portada: urlDeImagen,
-    // "" = sin contraportada (el visor 3D repite la portada); es lo que manda el admin con el campo vacío
+    // "" = sin contraportada
     contraportada: urlDeImagen.or(z.literal('')).default(''),
     // La normalización (sin #, minúsculas, sin acentos) la hace el modelo
     tags: z.array(

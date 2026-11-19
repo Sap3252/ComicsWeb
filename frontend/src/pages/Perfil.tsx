@@ -1,10 +1,10 @@
 import { useSession } from "../api/auth-client";
 
-// Privada: PrivateRoute ya esperó la sesión
+// Privada
 export function Perfil() {
     const { data: sesion } = useSession();
 
-    // Nunca pasa detrás de PrivateRoute; el if es para que TypeScript sepa que hay sesión
+    // Solo para TypeScript: PrivateRoute ya garantiza la sesión
     if (!sesion) return null;
 
     return (

@@ -6,7 +6,7 @@ export function PrivateRoute() {
     const { data: sesion, isPending } = useSession();
     const location = useLocation();
 
-    // Al recargar (F5) la sesión todavía se está pidiendo: redirigir ahora mandaría al login a alguien logueado
+    // Al recargar, la sesión todavía se está pidiendo: esperar en vez de redirigir
     if (isPending) {
         return <p className="globo">Cargando...</p>;
     }

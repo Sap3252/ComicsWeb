@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 3000;
 type Environment = "development" | "production" | "test";
 const NODE_ENV: Environment = (process.env.NODE_ENV as Environment) ?? "development";
 
-// Antes de express.json(): Better Auth lee el body por su cuenta y no funciona si ya fue parseado
+// Antes de express.json(): Better Auth parsea su propio body
 app.all('/api/auth/*splat', toNodeHandler(auth));
-app.use(express.json());                 // <-- sin esto, req.body llega undefined
+app.use(express.json());
 
 if (NODE_ENV === "development") {
   app.get('/', (req: Request, res: Response) => {
@@ -22,7 +22,8 @@ if (NODE_ENV === "development") {
   });
 }
 app.use('/api/comics', comicsRouter);
-app.use(errorHandler);                   // después de las rutas: recibe los errores que lanzan
+// Después de las rutas: recibe los errores que lanzan
+app.use(errorHandler);
 
 await connectDB();                        
 

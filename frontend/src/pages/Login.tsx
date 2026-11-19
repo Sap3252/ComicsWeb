@@ -17,20 +17,19 @@ export function Login() {
     // Si llegó redirigido desde una ruta privada, vuelve ahí después del login
     const destino = (location.state as { from?: string } | null)?.from ?? "/";
 
-    // Los errores del servidor van en "root": no son de un campo y React Hook Form los limpia al reenviar
+    // Errores del servidor en "root": no son de un campo
     const onSubmit = async ({ email, password }: LoginForm) => {
         const { error } = await signIn.email({ email, password });
         if (error) setError("root", { message: mensajeDeError(error) });
     };
 
-    // Sale de la app hacia el proveedor; al volver, Better Auth crea la sesión y redirige a callbackURL
+    // Al volver del proveedor, Better Auth crea la sesión y redirige a callbackURL
     const ingresarCon = async (provider: "github" | "google") => {
         const { error } = await signIn.social({ provider, callbackURL: destino });
         if (error) setError("root", { message: mensajeDeError(error) });
     };
 
-    // Se redirige cuando useSession ya tiene la sesión, no apenas responde signIn:
-    // si no, la ruta de destino todavía no la ve y vuelve a mandar al login
+    // Se espera a useSession: si no, la ruta destino todavía no ve la sesión
     if (sesion) {
         return <Navigate to={destino} replace />;
     }

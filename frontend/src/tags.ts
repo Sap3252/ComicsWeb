@@ -1,7 +1,7 @@
 // Acentos y diéresis, pero no la virgulilla: la ñ se conserva
 const ACENTOS = /[̀-̂̄-ͯ]/g;
 
-// Misma normalización que hace el backend al guardar (src/utils/tags.ts), para mostrar el tag como va a quedar
+// Misma normalización que el backend (backend/src/utils/tags.ts)
 const normalizarTag = (tag: string) =>
     tag
         .normalize("NFD").replace(ACENTOS, "").normalize("NFC")

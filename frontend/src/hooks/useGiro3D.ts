@@ -42,7 +42,7 @@ const inclinar = (x: number) => limitar(x, -INCLINACION_MAX, INCLINACION_MAX);
 // Ángulo más cercano a y que muestra la cara pedida (0 = frente, 180 = dorso)
 const anguloDeCara = (y: number, cara: 0 | 180) => Math.round((y - cara) / 360) * 360 + cara;
 
-// Cara donde encaja al soltar: la más cercana o, con un tirón, la siguiente en el sentido del giro
+// Cara donde encaja al soltar: la más cercana o, con un tirón, la siguiente
 function caraAlSoltar(y: number, velocidad: number): number {
     const mediasVueltas = y / MEDIA_VUELTA;
     if (Math.abs(velocidad) < VELOCIDAD_TIRON) return Math.round(mediasVueltas) * MEDIA_VUELTA;

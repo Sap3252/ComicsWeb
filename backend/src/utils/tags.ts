@@ -15,7 +15,7 @@ export function normalizarTag(tag: string): string {
         .replace(/[^a-z0-9ñ-]/g, '');
 }
 
-// Acepta una lista o un texto como "#manga, #dc" y devuelve los tags normalizados, sin vacíos ni repetidos
+// Acepta una lista o un texto como "#manga, #dc"; devuelve los tags sin vacíos ni repetidos
 export function normalizarTags(valor: unknown): string[] {
     let partes: unknown[] = [];
 

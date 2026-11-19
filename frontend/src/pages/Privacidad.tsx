@@ -1,4 +1,4 @@
-// Pública. Google exige una URL de política de privacidad para publicar el login con Google
+// Pública. Google la exige para publicar el login con Google
 const REPOSITORIO = "https://github.com/Sap3252/ComicsWeb";
 
 export function Privacidad() {

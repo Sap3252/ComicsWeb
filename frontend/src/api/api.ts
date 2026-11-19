@@ -1,5 +1,4 @@
-// Mismo origen que el frontend: Vite (en local) y Render (en producción) reenvían /api al backend.
-// Así el navegador manda la cookie de sesión de Better Auth en cada pedido
+// Mismo origen: Vite y Render reenvían /api al backend, así viaja la cookie de sesión
 const API_URL = "/api";
 
 export type Rol = "user" | "admin";
@@ -38,14 +37,13 @@ interface RespuestaError {
     errores?: { campo: string; mensaje: string }[];
 }
 
-// Los 400 de Zod traen el detalle por campo en "errores"; los de Mongoose, un texto en "error"
+// Zod manda el detalle en "errores"; Mongoose, en "error"
 function textoDeError(data: RespuestaError | null, status: number): string {
     const mensaje = data?.message ?? `Error ${status}`;
     const detalle = data?.errores?.map(({ campo, mensaje }) => `${campo}: ${mensaje}`).join(" · ") ?? data?.error;
     return detalle ? `${mensaje} — ${detalle}` : mensaje;
 }
 
-// Hace el fetch y convierte los errores del backend en Error
 async function request<T>(path: string, method = "GET", body?: unknown): Promise<T> {
     const headers: Record<string, string> = {};
     if (body !== undefined) headers["Content-Type"] = "application/json";
