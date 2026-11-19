@@ -1,28 +1,31 @@
-import { useState, type FormEvent } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Navigate, useLocation } from "react-router";
 import { mensajeDeError, signIn, useSession } from "../api/auth-client";
+import { ErrorDeCampo } from "../components/ErrorDeCampo";
+import { loginSchema, type LoginForm } from "../schemas/auth";
 
 // Pública
 export function Login() {
     const { data: sesion } = useSession();
     const location = useLocation();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<LoginForm>({
+        resolver: zodResolver(loginSchema)
+    });
 
     // Si llegó redirigido desde una ruta privada, vuelve ahí después del login
     const destino = (location.state as { from?: string } | null)?.from ?? "/";
 
-    const onSubmit = async (e: FormEvent) => {
-        e.preventDefault();
+    // Los errores del servidor van en "root": no son de un campo y React Hook Form los limpia al reenviar
+    const onSubmit = async ({ email, password }: LoginForm) => {
         const { error } = await signIn.email({ email, password });
-        if (error) setError(mensajeDeError(error));
+        if (error) setError("root", { message: mensajeDeError(error) });
     };
 
     // Sale de la app hacia GitHub; al volver, Better Auth crea la sesión y redirige a callbackURL
     const ingresarConGithub = async () => {
         const { error } = await signIn.social({ provider: "github", callbackURL: destino });
-        if (error) setError(mensajeDeError(error));
+        if (error) setError("root", { message: mensajeDeError(error) });
     };
 
     // Se redirige cuando useSession ya tiene la sesión, no apenas responde signIn:
@@ -32,12 +35,14 @@ export function Login() {
     }
 
     return (
-        <form className="acceso" onSubmit={onSubmit}>
+        <form className="acceso" onSubmit={handleSubmit(onSubmit)} noValidate>
             <h1>Ingresar</h1>
-            {error && <p className="error">{error}</p>}
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <button type="submit">Ingresar</button>
+            {errors.root && <p className="error">{errors.root.message}</p>}
+            <input type="email" placeholder="Email" aria-invalid={Boolean(errors.email)} {...register("email")} />
+            <ErrorDeCampo mensaje={errors.email?.message} />
+            <input type="password" placeholder="Contraseña" aria-invalid={Boolean(errors.password)} {...register("password")} />
+            <ErrorDeCampo mensaje={errors.password?.message} />
+            <button type="submit" disabled={isSubmitting}>Ingresar</button>
             <button type="button" onClick={ingresarConGithub}>Ingresar con GitHub</button>
             <p>¿No tenés cuenta? <Link to="/register">Registrate</Link></p>
         </form>
