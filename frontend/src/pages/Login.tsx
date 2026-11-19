@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Navigate, useLocation } from "react-router";
 import { mensajeDeError, signIn, useSession } from "../api/auth-client";
 import { ErrorDeCampo } from "../components/ErrorDeCampo";
+import { LogoGithub, LogoGoogle } from "../components/LogosProveedor";
 import { loginSchema, type LoginForm } from "../schemas/auth";
 
 // Pública
@@ -22,9 +23,9 @@ export function Login() {
         if (error) setError("root", { message: mensajeDeError(error) });
     };
 
-    // Sale de la app hacia GitHub; al volver, Better Auth crea la sesión y redirige a callbackURL
-    const ingresarConGithub = async () => {
-        const { error } = await signIn.social({ provider: "github", callbackURL: destino });
+    // Sale de la app hacia el proveedor; al volver, Better Auth crea la sesión y redirige a callbackURL
+    const ingresarCon = async (provider: "github" | "google") => {
+        const { error } = await signIn.social({ provider, callbackURL: destino });
         if (error) setError("root", { message: mensajeDeError(error) });
     };
 
@@ -43,8 +44,14 @@ export function Login() {
             <input type="password" placeholder="Contraseña" aria-invalid={Boolean(errors.password)} {...register("password")} />
             <ErrorDeCampo mensaje={errors.password?.message} />
             <button type="submit" disabled={isSubmitting}>Ingresar</button>
-            <button type="button" onClick={ingresarConGithub}>Ingresar con GitHub</button>
+            <button type="button" className="boton-proveedor" onClick={() => ingresarCon("github")}>
+                <LogoGithub /> Ingresar con GitHub
+            </button>
+            <button type="button" className="boton-proveedor" onClick={() => ingresarCon("google")}>
+                <LogoGoogle /> Ingresar con Google
+            </button>
             <p>¿No tenés cuenta? <Link to="/register">Registrate</Link></p>
+            <p className="aviso">Al ingresar aceptás la <Link to="/privacidad">política de privacidad</Link>.</p>
         </form>
     );
 }

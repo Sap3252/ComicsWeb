@@ -221,6 +221,13 @@ input::placeholder { color: var(--gris); font-weight: 400; }
 input:focus { outline: none; background: var(--resalte); box-shadow: 4px 4px 0 var(--cian); }
 .acciones { display: flex; flex-wrap: wrap; gap: 10px; }
 
+/* Botones de login social: logo + texto centrados */
+.boton-proveedor { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.logo-proveedor { width: 1.2em; height: 1.2em; flex-shrink: 0; }
+
+/* Texto chico al pie de un formulario, como el aviso de privacidad del login */
+.aviso { font-size: .8rem; color: var(--gris); }
+
 /* Errores de validación por campo (React Hook Form + Zod) */
 input[aria-invalid="true"] { border-color: var(--rojo); box-shadow: 3px 3px 0 var(--rojo); }
 .error-campo { color: var(--rojo); font-size: .85rem; font-weight: 700; text-transform: none; letter-spacing: 0; }
@@ -400,6 +407,9 @@ td button { margin-left: 8px; padding: 2px 10px; font-size: .95rem; }
 .ficha li { padding: 8px 0; border-bottom: 2px dashed var(--tinta); font-size: 1.1rem; }
 .ficha li:last-child { border-bottom: 0; }
 .ficha strong { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--violeta); }
+/* Para textos largos, como la política de privacidad */
+.ficha.ancha { max-width: 540px; padding: 14px 20px; transform: none; }
+.ficha.ancha li { padding: 6px 0; font-size: .9rem; line-height: 1.45; }
 
 @media (max-width: 520px) {
     body { padding: 12px 16px 48px; font-size: 16px; }

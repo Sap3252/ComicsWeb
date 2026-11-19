@@ -32,6 +32,10 @@ export const auth = betterAuth({
         github: {
             clientId: requireEnv("GITHUB_CLIENT_ID"),
             clientSecret: requireEnv("GITHUB_CLIENT_SECRET")
+        },
+        google: {
+            clientId: requireEnv("GOOGLE_CLIENT_ID"),
+            clientSecret: requireEnv("GOOGLE_CLIENT_SECRET")
         }
     },
     plugins: [admin({ defaultRole: "user", adminRoles: ["admin"] })]
