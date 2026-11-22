@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TIPOS } from "../api/api";
 import { enteroPositivo, texto } from "./campos";
 
 // Los límites son los del backend (backend/src/schemas/comic.schema.ts)
@@ -11,6 +12,7 @@ const urlDeImagen = texto(MAX_LARGO_URL)
     .pipe(z.url({ protocol: /^https?$/, error: "Tiene que ser una URL que empiece con http:// o https://" }));
 
 export const comicSchema = z.object({
+    tipo: z.enum(TIPOS, "Tiene que ser cómic o libro"),
     titulo: texto(MAX_LARGO_TEXTO),
     año: enteroPositivo,
     volumen: enteroPositivo,

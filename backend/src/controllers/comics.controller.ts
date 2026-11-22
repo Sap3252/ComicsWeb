@@ -1,18 +1,21 @@
 import type { Request, Response } from 'express';
-import Comic from '../models/comics.js';
+import Comic, { TIPOS } from '../models/comics.js';
 import { HttpError } from '../errors/http-error.js';
 import type { ComicInput } from '../schemas/comic.schema.js';
 import { getComicActivo } from '../services/comics.service.js';
 import { getResumenVotos, getResumenVotosDe, RESUMEN_VACIO } from '../services/votos.service.js';
 import { normalizarTags } from '../utils/tags.js';
 
-// GET /api/comics            -> todos los cómics
-// GET /api/comics?tags=a,b   -> solo los que tienen todos esos tags
+// GET /api/comics              -> todo el catálogo
+// GET /api/comics?tags=a,b     -> solo los que tienen todos esos tags
+// GET /api/comics?tipo=libro   -> solo cómics o solo libros
 export const getComics = async (req: Request, res: Response): Promise<void> => {
     const tags = normalizarTags(req.query.tags);
+    const tipo = TIPOS.find((t) => t === req.query.tipo);
     const comics = await Comic.find({
         activo: true,
-        ...(tags.length > 0 ? { tags: { $all: tags } } : {})
+        ...(tags.length > 0 ? { tags: { $all: tags } } : {}),
+        ...(tipo ? { tipo } : {})
     });
     const votos = await getResumenVotos(comics.map((c) => c._id));
 
