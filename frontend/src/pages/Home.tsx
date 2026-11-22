@@ -1,9 +1,11 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link } from "react-router";
 import * as api from "../api/api";
-import { NOMBRE_TIPO, TIPOS, type Comic, type Tipo, type TipoVoto } from "../api/api";
+import type { Comic, TipoVoto } from "../api/api";
+import { ControlesCatalogo } from "../components/ControlesCatalogo";
 import { TarjetaComic } from "../components/TarjetaComic";
 import { useSession } from "../api/auth-client";
+import { useFiltrosCatalogo } from "../hooks/useFiltrosCatalogo";
 import { leerTags } from "../tags";
 
 // Las portadas de la primera fila se piden enseguida; el resto, al acercarse a la pantalla
@@ -18,32 +20,23 @@ export function Home() {
     const [error, setError] = useState("");
     const [busqueda, setBusqueda] = useState("");
 
-    // Los filtros viven en la URL (/?tipo=libro&tags=manga,dc): se pueden compartir y funciona el botón "atrás"
-    const [params, setParams] = useSearchParams();
-    const tagsEnUrl = params.get("tags") ?? "";
-    const filtro = leerTags(tagsEnUrl);
-    const tipo = TIPOS.find((t) => t === params.get("tipo"));
+    const { tags: filtro, tipo, orden, cambiarFiltros } = useFiltrosCatalogo();
+    // Texto y no la lista: un array nuevo en cada render volvería a disparar el efecto
+    const tagsEnUrl = filtro.join(",");
 
     useEffect(() => {
         // Si el filtro cambia antes de que llegue la respuesta, la respuesta vieja se descarta
         let vigente = true;
-        api.getComics(leerTags(tagsEnUrl), tipo)
+        api.getComics({ tags: filtro, tipo, orden })
             .then((lista) => vigente && setComics(lista))
             .catch((e: Error) => vigente && setError(e.message))
             .finally(() => vigente && setCargando(false));
         return () => {
             vigente = false;
         };
-    }, [tagsEnUrl, tipo]);
+    }, [tagsEnUrl, tipo, orden]);
 
-    const aplicarFiltros = (tags: string[], nuevoTipo: Tipo | undefined) => {
-        const nuevos: Record<string, string> = {};
-        if (nuevoTipo) nuevos.tipo = nuevoTipo;
-        if (tags.length > 0) nuevos.tags = tags.join(",");
-        setParams(nuevos);
-    };
-
-    const filtrar = (tags: string[]) => aplicarFiltros(tags, tipo);
+    const filtrar = (tags: string[]) => cambiarFiltros({ tags });
 
     const buscar = (e: FormEvent) => {
         e.preventDefault();
@@ -73,14 +66,12 @@ export function Home() {
             {error && <p className="error">{error}</p>}
             {!isPending && !sesion && <p className="leyenda"><Link to="/login">Ingresá</Link> para votar.</p>}
 
-            <div className="acciones">
-                <button className={tipo ? "" : "activo"} onClick={() => aplicarFiltros(filtro, undefined)}>Todo</button>
-                {TIPOS.map((t) => (
-                    <button key={t} className={tipo === t ? "activo" : ""} onClick={() => aplicarFiltros(filtro, t)}>
-                        {NOMBRE_TIPO[t]}s
-                    </button>
-                ))}
-            </div>
+            <ControlesCatalogo
+                tipo={tipo}
+                orden={orden}
+                onTipo={(nuevo) => cambiarFiltros({ tipo: nuevo })}
+                onOrden={(nuevo) => cambiarFiltros({ orden: nuevo })}
+            />
 
             <form className="buscador" onSubmit={buscar}>
                 <input
