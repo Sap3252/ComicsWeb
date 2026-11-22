@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as api from "../api/api";
-import type { Comic } from "../api/api";
+import { NOMBRE_TIPO, TIPOS, type Comic } from "../api/api";
 import { ErrorDeCampo } from "../components/ErrorDeCampo";
 import { SelectorTags } from "../components/SelectorTags";
 import { comicSchema, type ComicForm } from "../schemas/comic";
 import { escribirTags } from "../tags";
 
-const VACIO: ComicForm = { titulo: "", año: new Date().getFullYear(), volumen: 1, autor: "", saga: "", portada: "", contraportada: "", tags: [] };
+const VACIO: ComicForm = { tipo: "comic", titulo: "", año: new Date().getFullYear(), volumen: 1, autor: "", saga: "", portada: "", contraportada: "", tags: [] };
 
-// Los tags no están acá: se eligen con SelectorTags
+// El tipo y los tags no están acá: tienen su propio control
 const CAMPOS: { name: Exclude<keyof ComicForm, "tags">; label: string; type: "text" | "number"; opcional?: boolean }[] = [
     { name: "titulo", label: "Título", type: "text" },
     { name: "saga", label: "Saga", type: "text" },
@@ -21,7 +21,7 @@ const CAMPOS: { name: Exclude<keyof ComicForm, "tags">; label: string; type: "te
     { name: "contraportada", label: "URL de la contraportada", type: "text", opcional: true }
 ];
 
-// Protegida por rol: solo admin. Alta, edición y baja de cómics
+// Protegida por rol: solo admin. Alta, edición y baja de cómics y libros
 export function Admin() {
     const [comics, setComics] = useState<Comic[]>([]);
     const { register, handleSubmit, reset, control, formState: { errors, isSubmitting } } = useForm<ComicForm>({
@@ -53,9 +53,9 @@ export function Admin() {
     };
 
     const editar = (comic: Comic) => {
-        const { titulo, año, volumen, autor, saga, portada, tags } = comic;
+        const { tipo, titulo, año, volumen, autor, saga, portada, tags } = comic;
         setEditandoId(comic._id);
-        reset({ titulo, año, volumen, autor, saga, portada, contraportada: comic.contraportada ?? "", tags });
+        reset({ tipo, titulo, año, volumen, autor, saga, portada, contraportada: comic.contraportada ?? "", tags });
     };
 
     const cancelar = () => {
@@ -69,22 +69,28 @@ export function Admin() {
             if (id) await api.editarComic(id, comic);
             else await api.crearComic(comic);
             cancelar();
-        }, id ? "Cómic actualizado" : "Cómic creado");
+        }, `${NOMBRE_TIPO[comic.tipo]} ${id ? "actualizado" : "creado"}`);
     };
 
     const eliminar = (comic: Comic) => {
         if (!confirm(`¿Eliminar "${comic.titulo}"?`)) return;
-        ejecutar(() => api.eliminarComic(comic._id), "Cómic eliminado");
+        ejecutar(() => api.eliminarComic(comic._id), `${NOMBRE_TIPO[comic.tipo]} eliminado`);
     };
 
     return (
         <>
-            <h1 className="titular">Administrar cómics</h1>
+            <h1 className="titular">Administrar catálogo</h1>
             {mensaje && <p className="ok">{mensaje}</p>}
             {error && <p className="error">{error}</p>}
 
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
-                <h2>{editandoId ? "Editar cómic" : "Nuevo cómic"}</h2>
+                <h2>{editandoId ? "Editar" : "Agregar al catálogo"}</h2>
+                <label>
+                    Tipo
+                    <select {...register("tipo")}>
+                        {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{NOMBRE_TIPO[tipo]}</option>)}
+                    </select>
+                </label>
                 {CAMPOS.map(({ name, label, type, opcional }) => (
                     <label key={name}>
                         {opcional ? `${label} (opcional)` : label}
@@ -111,12 +117,13 @@ export function Admin() {
                 </div>
             </form>
 
-            <h2 className="subtitulo">Cómics cargados</h2>
+            <h2 className="subtitulo">Cargados</h2>
             <div className="tabla">
                 <table>
                     <tbody>
                         {comics.map((comic) => (
                             <tr key={comic._id}>
+                                <td>{NOMBRE_TIPO[comic.tipo]}</td>
                                 <td>{comic.titulo} (Vol. {comic.volumen})</td>
                                 <td>{escribirTags(comic.tags)}</td>
                                 <td>Puntaje: {comic.votos.puntaje}</td>

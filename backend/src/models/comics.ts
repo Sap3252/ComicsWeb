@@ -1,6 +1,9 @@
 import {Schema, Model, Document, Types, model } from 'mongoose';
 import { MAX_LARGO_TAG, MAX_TAGS, normalizarTags } from '../utils/tags.js';
 
+export const TIPOS = ["comic", "libro"] as const;
+export type Tipo = (typeof TIPOS)[number];
+
 export interface IComic {
     titulo: string;
     año: number;
@@ -10,6 +13,7 @@ export interface IComic {
     portada: string;
     contraportada?: string;
     tags: string[];
+    tipo: Tipo;
     activo: boolean;
 }
 
@@ -68,6 +72,11 @@ const comicSchema = new Schema<IComicDocument>({
                 tags.length <= MAX_TAGS && tags.every((tag) => tag.length <= MAX_LARGO_TAG),
             message: `Un cómic puede tener hasta ${MAX_TAGS} tags de ${MAX_LARGO_TAG} caracteres como máximo`
         }
+    },
+    tipo: {
+        type: String,
+        enum: { values: TIPOS, message: "El tipo tiene que ser 'comic' o 'libro'" },
+        default: "comic"
     },
     activo: {
         type: Boolean,

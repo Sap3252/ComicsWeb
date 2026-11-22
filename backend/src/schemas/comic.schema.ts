@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TIPOS } from '../models/comics.js';
 import { MAX_LARGO_TAG, MAX_TAGS } from '../utils/tags.js';
 
 const MAX_LARGO_TEXTO = 80;
@@ -25,6 +26,7 @@ const urlDeImagen = texto(MAX_LARGO_URL)
 
 // Sin "activo": la baja es solo con DELETE
 export const comicSchema = z.object({
+    tipo: z.enum(TIPOS, 'Tiene que ser "comic" o "libro"').default('comic'),
     titulo: texto(MAX_LARGO_TEXTO),
     año: enteroPositivo,
     volumen: enteroPositivo,

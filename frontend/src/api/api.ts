@@ -3,6 +3,10 @@ const API_URL = "/api";
 
 export type Rol = "user" | "admin";
 
+export const TIPOS = ["comic", "libro"] as const;
+export type Tipo = (typeof TIPOS)[number];
+export const NOMBRE_TIPO: Record<Tipo, string> = { comic: "Cómic", libro: "Libro" };
+
 export interface Votos {
     puntaje: number;
     upvotes: number;
@@ -11,6 +15,7 @@ export interface Votos {
 
 export interface Comic {
     _id: string;
+    tipo: Tipo;
     titulo: string;
     año: number;
     volumen: number;
@@ -62,9 +67,14 @@ async function request<T>(path: string, method = "GET", body?: unknown): Promise
 }
 
 // Cómics
-// Con tags, trae solo los cómics que los tienen todos
-export const getComics = (tags: string[] = []) =>
-    request<Comic[]>(tags.length > 0 ? `/comics?tags=${encodeURIComponent(tags.join(","))}` : "/comics");
+// Con tags, trae solo los que los tienen todos; con tipo, solo cómics o solo libros
+export const getComics = (tags: string[] = [], tipo?: Tipo) => {
+    const params = new URLSearchParams();
+    if (tags.length > 0) params.set("tags", tags.join(","));
+    if (tipo) params.set("tipo", tipo);
+    const query = params.toString();
+    return request<Comic[]>(query ? `/comics?${query}` : "/comics");
+};
 
 export const getComic = (id: string) => request<Comic>(`/comics/${id}`);
 
