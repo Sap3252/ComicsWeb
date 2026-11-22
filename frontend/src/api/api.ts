@@ -7,6 +7,21 @@ export const TIPOS = ["comic", "libro"] as const;
 export type Tipo = (typeof TIPOS)[number];
 export const NOMBRE_TIPO: Record<Tipo, string> = { comic: "Cómic", libro: "Libro" };
 
+export const ORDENES = ["votos", "nuevos", "viejos", "nombre"] as const;
+export type Orden = (typeof ORDENES)[number];
+export const NOMBRE_ORDEN: Record<Orden, string> = {
+    votos: "Más votados",
+    nuevos: "Más nuevos",
+    viejos: "Más viejos",
+    nombre: "Nombre (A-Z)"
+};
+
+export interface FiltrosCatalogo {
+    tags: string[];
+    tipo: Tipo | undefined;
+    orden: Orden | undefined;
+}
+
 export interface Votos {
     puntaje: number;
     upvotes: number;
@@ -67,11 +82,12 @@ async function request<T>(path: string, method = "GET", body?: unknown): Promise
 }
 
 // Cómics
-// Con tags, trae solo los que los tienen todos; con tipo, solo cómics o solo libros
-export const getComics = (tags: string[] = [], tipo?: Tipo) => {
+// Con tags, trae solo los que los tienen todos; con tipo, solo cómics o solo libros; con orden, ordenados
+export const getComics = ({ tags = [], tipo, orden }: Partial<FiltrosCatalogo> = {}) => {
     const params = new URLSearchParams();
     if (tags.length > 0) params.set("tags", tags.join(","));
     if (tipo) params.set("tipo", tipo);
+    if (orden) params.set("orden", orden);
     const query = params.toString();
     return request<Comic[]>(query ? `/comics?${query}` : "/comics");
 };

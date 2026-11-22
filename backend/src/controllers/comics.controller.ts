@@ -2,16 +2,18 @@ import type { Request, Response } from 'express';
 import Comic, { TIPOS } from '../models/comics.js';
 import { HttpError } from '../errors/http-error.js';
 import type { ComicInput } from '../schemas/comic.schema.js';
-import { getComicActivo } from '../services/comics.service.js';
+import { getComicActivo, ORDENES, ordenar } from '../services/comics.service.js';
 import { getResumenVotos, getResumenVotosDe, RESUMEN_VACIO } from '../services/votos.service.js';
 import { normalizarTags } from '../utils/tags.js';
 
 // GET /api/comics              -> todo el catálogo
 // GET /api/comics?tags=a,b     -> solo los que tienen todos esos tags
 // GET /api/comics?tipo=libro   -> solo cómics o solo libros
+// GET /api/comics?orden=votos  -> ordenados por votos, nuevos, viejos o nombre
 export const getComics = async (req: Request, res: Response): Promise<void> => {
     const tags = normalizarTags(req.query.tags);
     const tipo = TIPOS.find((t) => t === req.query.tipo);
+    const orden = ORDENES.find((o) => o === req.query.orden);
     const comics = await Comic.find({
         activo: true,
         ...(tags.length > 0 ? { tags: { $all: tags } } : {}),
@@ -19,10 +21,12 @@ export const getComics = async (req: Request, res: Response): Promise<void> => {
     });
     const votos = await getResumenVotos(comics.map((c) => c._id));
 
-    res.json(comics.map((c) => ({
+    const conVotos = comics.map((c) => ({
         ...c.toObject(),
         votos: votos.get(c._id.toString()) ?? RESUMEN_VACIO
-    })));
+    }));
+
+    res.json(ordenar(conVotos, orden));
 };
 
 // GET /api/comics/:id

@@ -326,6 +326,8 @@ input[aria-invalid="true"] { border-color: var(--rojo); box-shadow: 3px 3px 0 va
 .votos button.activo.contra { border-color: var(--cian); background: var(--cian); color: var(--tinta); }
 
 /* Buscador y tags */
+.controles-catalogo { align-items: center; margin-bottom: 14px; }
+.orden { flex-direction: row; align-items: center; gap: 8px; }
 .buscador {
     flex-direction: row;
     max-width: 560px;
