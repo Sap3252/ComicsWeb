@@ -182,6 +182,23 @@ nav .leyenda { margin: 0; font-size: .85rem; transform: rotate(1.5deg); box-shad
 
 main { margin-top: 28px; }
 
+/* Pestañas del panel de admin: etiquetas como las del nav, sobre papel */
+.pestanas { display: flex; flex-wrap: wrap; gap: 12px; }
+.pestanas a {
+    padding: 4px 16px;
+    border: var(--borde);
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: var(--titulos);
+    font-size: 1.2rem;
+    letter-spacing: .05em;
+    text-decoration: none;
+    box-shadow: 3px 3px 0 var(--cian);
+    transform: skewX(-8deg);
+}
+.pestanas a:hover { background: #fff; }
+.pestanas a[aria-current="page"] { background: var(--amarillo); box-shadow: 3px 3px 0 var(--magenta); }
+
 /* Botones: etiqueta amarilla que se hunde al apretarla */
 button {
     padding: 5px 14px;
@@ -207,7 +224,7 @@ form.acceso { margin: 48px auto; transform: rotate(-1deg); }
 form h1, form h2 { color: var(--tinta); text-shadow: 2px 2px 0 var(--amarillo); }
 form p { margin: 0; }
 label { display: flex; flex-direction: column; gap: 3px; font-size: .9rem; text-transform: uppercase; letter-spacing: .03em; }
-input {
+input, select {
     padding: 8px 10px;
     border: var(--borde);
     border-radius: 0;
@@ -218,7 +235,7 @@ input {
     text-transform: none;
 }
 input::placeholder { color: var(--gris); font-weight: 400; }
-input:focus { outline: none; background: var(--resalte); box-shadow: 4px 4px 0 var(--cian); }
+input:focus, select:focus { outline: none; background: var(--resalte); box-shadow: 4px 4px 0 var(--cian); }
 .acciones { display: flex; flex-wrap: wrap; gap: 10px; }
 
 /* Botones de login social: logo + texto centrados */

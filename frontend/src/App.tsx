@@ -8,8 +8,10 @@ import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Perfil } from "./pages/Perfil";
 import { Admin } from "./pages/Admin";
+import { PanelAdmin } from "./pages/PanelAdmin";
 import { ComicDetalle } from "./pages/ComicDetalle";
 import { Privacidad } from "./pages/Privacidad";
+import { Usuarios } from "./pages/Usuarios";
 
 export function App() {
     const { data: sesion } = useSession();
@@ -54,7 +56,10 @@ export function App() {
 
                     {/* Rutas privadas protegidas por rol: solo admin */}
                     <Route element={<RoleRoute roles={["admin"]} />}>
-                        <Route path="/admin" element={<Admin />} />
+                        <Route path="/admin" element={<PanelAdmin />}>
+                            <Route index element={<Admin />} />
+                            <Route path="usuarios" element={<Usuarios />} />
+                        </Route>
                     </Route>
 
                     <Route path="*" element={<Navigate to="/" replace />} />
