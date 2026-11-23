@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Panel de tinta con el "fuera de registro" de la página: cian arriba a la izquierda, magenta abajo a la derecha -->
+  <rect x="7" y="7" width="55" height="55" rx="9" fill="#ff2a7f"/>
+  <rect x="2" y="2" width="55" height="55" rx="9" fill="#19e3ff"/>
+  <rect x="4.5" y="4.5" width="55" height="55" rx="9" fill="#0a0a0f"/>
+
+  <defs>
+    <!-- Letras como trazos: un favicon no puede cargar la fuente Bangers -->
+    <g id="letras" fill="none" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="2.5">
+      <path d="M26.4 24.3 A10 10 0 1 0 26.4 39.7"/>
+      <path d="M31 22 L35.5 42 L42 29 L48.5 42 L53 22"/>
+    </g>
+  </defs>
+
+  <!-- Inclinadas como los links del nav -->
+  <g transform="translate(32 32) skewX(-8) translate(-32 -32)">
+    <use href="#letras" stroke="#19e3ff" stroke-width="6.5" transform="translate(-1.8 -1.8)"/>
+    <use href="#letras" stroke="#ff2a7f" stroke-width="6.5" transform="translate(2 2)"/>
+    <use href="#letras" stroke="#0a0a0f" stroke-width="9.5"/>
+    <use href="#letras" stroke="#ffe600" stroke-width="6.5"/>
+  </g>
+</svg>
