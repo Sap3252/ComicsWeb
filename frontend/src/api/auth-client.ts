@@ -4,7 +4,7 @@ import { adminClient } from "better-auth/client/plugins";
 // Sin baseURL: usa /api/auth del mismo origen
 export const authClient = createAuthClient({ plugins: [adminClient()] });
 
-export const { useSession, signIn, signUp, signOut } = authClient;
+export const { useSession, signIn, signUp, signOut, updateUser } = authClient;
 
 // Better Auth responde en inglés
 const MENSAJES_DE_ERROR: Record<string, string> = {

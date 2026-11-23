@@ -20,5 +20,9 @@ export const registroSchema = z.object({
         .max(LARGO_MAXIMO_PASSWORD, `No puede tener más de ${LARGO_MAXIMO_PASSWORD} caracteres`)
 });
 
+// Mismas reglas que el nombre del registro
+export const nombreSchema = registroSchema.pick({ nombre: true });
+
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegistroForm = z.infer<typeof registroSchema>;
+export type NombreForm = z.infer<typeof nombreSchema>;
