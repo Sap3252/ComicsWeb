@@ -1,4 +1,5 @@
 import { useSession } from "../api/auth-client";
+import { FormularioNombre } from "../components/FormularioNombre";
 
 // Privada
 export function Perfil() {
@@ -15,6 +16,7 @@ export function Perfil() {
                 <li><strong>Email</strong> {sesion.user.email}</li>
                 <li><strong>Rol</strong> {sesion.user.role}</li>
             </ul>
+            <FormularioNombre nombreActual={sesion.user.name} />
         </>
     );
 }
